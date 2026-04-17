@@ -64,6 +64,7 @@
             <Border Classes="badge"><TextBlock Text="{Binding UspRailAx}" /></Border>
             <Border Classes="badge"><TextBlock Text="{Binding UspRailHandoff}" /></Border>
             <Border Classes="badge"><TextBlock Text="{Binding UspRailVoice}" /></Border>
+            <Border Classes="badge"><TextBlock Text="{Binding UspRailLocalFirst}" /></Border>
           </WrapPanel>
           <TextBlock Classes="muted"
                      Text="Shortcuts: Ctrl+L Live Context · Ctrl+K Knowledge · Ctrl+Enter run ask"
@@ -132,6 +133,7 @@
               <Expander Header="Prompt, ask, and action plan" IsExpanded="True">
                 <StackPanel Spacing="12">
                   <TextBlock Text="prompt" />
+                  <TextBlock Text="{Binding HandoffRouteHint}" TextWrapping="Wrap" Foreground="#C4E8FF" />
                   <TextBox Text="{Binding AssistantPrompt}" AcceptsReturn="True" TextWrapping="Wrap" Height="200" />
                   <TextBlock Text="AX fat-client support is active via ax.* plan steps with form/dialog/tab guards." Foreground="#9CB3D1" TextWrapping="Wrap" />
                   <WrapPanel ItemSpacing="8">
@@ -230,14 +232,20 @@
               </Border>
             </Button>
 
-            <Border Classes="card" Width="460" MinWidth="320">
-              <StackPanel Spacing="12">
-                <TextBlock Classes="section" Text="Proactive Karl" />
-                <TextBlock Classes="kicker" Text="Companion Guidance" />
-                <TextBlock Text="{Binding ProactiveSuggestionSummary}" TextWrapping="Wrap" />
-                <TextBlock Text="{Binding SafetyPolicySummary}" TextWrapping="Wrap" Foreground="#FFDFA5" />
-              </StackPanel>
-            </Border>
+            <Button Classes="dashboardNav"
+                    Width="460"
+                    MinWidth="320"
+                    Click="OnDashboardNavigateProactiveClick"
+                    ToolTip.Tip="Open Ask tab (companion suggestions appear after refresh)">
+              <Border Classes="card" HorizontalAlignment="Stretch">
+                <StackPanel Spacing="12">
+                  <TextBlock Classes="section" Text="Proactive Karl" />
+                  <TextBlock Classes="kicker" Text="Companion Guidance — click for Ask" />
+                  <TextBlock Text="{Binding ProactiveSuggestionSummary}" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding SafetyPolicySummary}" TextWrapping="Wrap" Foreground="#FFDFA5" />
+                </StackPanel>
+              </Border>
+            </Button>
 
             <Button Classes="dashboardNav"
                     Width="460"
@@ -284,7 +292,7 @@
 
       <TabItem Header="Setup">
         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-          <Grid Margin="0,16,0,0" RowDefinitions="Auto,Auto" ColumnDefinitions="420,*" ColumnSpacing="16" RowSpacing="16">
+          <Grid Margin="0,16,0,0" RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="420,*" ColumnSpacing="16" RowSpacing="16">
             <Border Classes="card" Grid.Column="0" Grid.Row="0">
               <StackPanel Spacing="14">
                 <TextBlock Classes="section" Text="Provider + Mode" />
@@ -329,6 +337,18 @@
                 <TextBlock Classes="section" Text="Shipping and AX depth" />
                 <TextBlock TextWrapping="Wrap" Foreground="#9CB3D1"
                            Text="Release: see docs/RELEASE.md and avalonia/Publish-Release.cmd for self-contained publish. AX enterprise depth (grid, lookup, UIA): docs/backlog-ax.md and docs/epics-shipping-local-first.md." />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card" Grid.Row="2" Grid.ColumnSpan="2">
+              <StackPanel Spacing="10">
+                <TextBlock Classes="section" Text="Local-first / offline stack" />
+                <TextBlock Classes="kicker" Text="From windows/.env (no secret values shown)" />
+                <TextBox Text="{Binding OfflineStackSummary}"
+                         IsReadOnly="True"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         Height="200" />
               </StackPanel>
             </Border>
           </Grid>

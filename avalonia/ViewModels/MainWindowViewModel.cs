@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Avalonia.Threading;
 using CarolusNexus.Core;
 using CarolusNexus.Platform.Windows;
@@ -93,6 +94,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private string _uspRailAx = "foreground: —";
     private string _uspRailHandoff = "auto-route: on";
     private string _uspRailVoice = "voice: off";
+    private string _uspRailLocalFirst = "local • …";
+    private string _handoffRouteHint = "Handoff: type a prompt to see routing.";
+    private string _offlineStackSummary = "Offline stack: refresh to load .env summary.";
     private int _mainTabSelectedIndex;
     private string _axContextSummary = "no active AX context";
     private string _axSuggestedActions = "ax.* actions become available when an AX client is active";
@@ -226,6 +230,7 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
             }
 
             UpdateUspRail();
+            UpdateHandoffRouteHint();
         }
     }
 
@@ -317,6 +322,24 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
     {
         get => _uspRailVoice;
         private set => SetField(ref _uspRailVoice, value);
+    }
+
+    public string UspRailLocalFirst
+    {
+        get => _uspRailLocalFirst;
+        private set => SetField(ref _uspRailLocalFirst, value);
+    }
+
+    public string HandoffRouteHint
+    {
+        get => _handoffRouteHint;
+        private set => SetField(ref _handoffRouteHint, value);
+    }
+
+    public string OfflineStackSummary
+    {
+        get => _offlineStackSummary;
+        private set => SetField(ref _offlineStackSummary, value);
     }
 
     public int MainTabSelectedIndex
@@ -785,7 +808,15 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
     public string AssistantPrompt
     {
         get => _assistantPrompt;
-        set => SetField(ref _assistantPrompt, value);
+        set
+        {
+            if (!SetField(ref _assistantPrompt, value))
+            {
+                return;
+            }
+
+            UpdateHandoffRouteHint();
+        }
     }
 
     public string AssistantResponse
@@ -945,7 +976,9 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
         OnPropertyChanged(nameof(KnowledgeStatus));
         OnPropertyChanged(nameof(CountsSummary));
         OnPropertyChanged(nameof(HasPendingActionPlan));
+        OfflineStackSummary = BuildOfflineStackSummary(snapshot);
         UpdateUspRail();
+        UpdateHandoffRouteHint();
     }
 
     public void SaveSettings()
@@ -1496,6 +1529,7 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
         }
 
         UpdateUspRail();
+        UpdateHandoffRouteHint();
     }
 
     public void NavigateToLiveContext()
@@ -1564,6 +1598,85 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
         StatusMessage = "On Ask tab: click smoke test to verify your provider and keys.";
     }
 
+    private void UpdateHandoffRouteHint()
+    {
+        var prompt = AssistantPrompt ?? string.Empty;
+        var active = _workspaceService.GetActiveWindow();
+        if (AgentHandoffTriggers.IsOpenClawTriggered(prompt))
+        {
+            HandoffRouteHint = "Next step: OpenClaw CLI (explicit phrase in prompt).";
+            return;
+        }
+
+        if (AgentHandoffTriggers.IsClaudeCodeTriggered(prompt))
+        {
+            HandoffRouteHint = "Next step: Claude Code CLI (explicit phrase in prompt).";
+            return;
+        }
+
+        if (AgentHandoffTriggers.IsCodexTriggered(prompt))
+        {
+            var screen = AgentHandoffTriggers.ShouldAttachCodexScreens(prompt);
+            HandoffRouteHint = screen
+                ? "Next step: Codex CLI with screen JPEGs (explicit phrase)."
+                : "Next step: Codex CLI (explicit phrase).";
+            return;
+        }
+
+        if (!_autoRouteLocalAgents)
+        {
+            HandoffRouteHint = "Auto-route off → main cloud Ask (unless you add nimm codex / claude code / openclaw).";
+            return;
+        }
+
+        HandoffRouteHint = AgentHandoffTriggers.DetectIntentRoute(prompt, active) switch
+        {
+            "codex" => "Auto-route on → this prompt looks like coding/IDE work → would route to Codex.",
+            "openclaw" => "Auto-route on → agent-style prompt → would route to OpenClaw.",
+            _ => "Auto-route on → standard cloud Ask (no IDE/agent pattern detected)."
+        };
+    }
+
+    private static string BuildOfflineStackSummary(OperatorWorkspaceSnapshot snapshot)
+    {
+        var sb = new StringBuilder();
+        var env = snapshot.EnvValues;
+        sb.AppendLine(snapshot.EnvExists ? "windows/.env: present" : "windows/.env: missing — copy .env.example");
+        var stt = env.TryGetValue("STT_PROVIDER", out var stRaw) && !string.IsNullOrWhiteSpace(stRaw)
+            ? stRaw.Trim()
+            : "(unset → whisper)";
+        sb.AppendLine($"STT_PROVIDER: {stt}");
+        if (!stt.Equals("elevenlabs", StringComparison.OrdinalIgnoreCase))
+        {
+            env.TryGetValue("WHISPER_PYTHON", out var py);
+            env.TryGetValue("WHISPER_MODEL", out var model);
+            sb.AppendLine($"Whisper: python={(string.IsNullOrWhiteSpace(py) ? "python" : py)}, model={(string.IsNullOrWhiteSpace(model) ? "base" : model)}");
+        }
+
+        sb.AppendLine(EnvKeyHasValue(env, "ELEVENLABS_API_KEY")
+            ? "ElevenLabs: key present (cloud STT/TTS when selected)"
+            : "ElevenLabs: no key — use Whisper for STT; TTS falls back to Windows SAPI when speak is on");
+        sb.AppendLine(EnvKeyHasValue(env, "CODEX_COMMAND")
+            ? $"Codex: {env["CODEX_COMMAND"].Trim()}"
+            : "Codex: CODEX_COMMAND not set");
+        sb.AppendLine(EnvKeyHasValue(env, "CLAUDE_CODE_COMMAND")
+            ? $"Claude Code: {env["CLAUDE_CODE_COMMAND"].Trim()}"
+            : "Claude Code: CLAUDE_CODE_COMMAND not set");
+        sb.AppendLine(EnvKeyHasValue(env, "OPENCLAW_COMMAND")
+            ? $"OpenClaw: {env["OPENCLAW_COMMAND"].Trim()}"
+            : "OpenClaw: OPENCLAW_COMMAND not set");
+        if (env.TryGetValue("PUSH_TO_TALK_KEY", out var ptt) && !string.IsNullOrWhiteSpace(ptt))
+        {
+            sb.AppendLine($"Push-to-talk: {ptt.Trim()}");
+        }
+
+        sb.AppendLine("Vision / main LLM: cloud providers in this build. Local Ollama-style stack: see README local-first (not wired as primary UI path yet).");
+        return sb.ToString().TrimEnd();
+    }
+
+    private static bool EnvKeyHasValue(Dictionary<string, string> env, string key) =>
+        env.TryGetValue(key, out var v) && !string.IsNullOrWhiteSpace(v);
+
     private void UpdateUspRail()
     {
         var snapshot = _workspaceService.Load();
@@ -1577,6 +1690,15 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
             ? (snapshot.SpeakAfterAsk ? "voice • +after ask" : "voice • on")
             : "voice • off";
         UspRailAx = kind == "ax" ? "fg • AX" : $"fg • {kind}";
+        var env = snapshot.EnvValues;
+        var stt = env.TryGetValue("STT_PROVIDER", out var sttRaw) && !string.IsNullOrWhiteSpace(sttRaw)
+            ? sttRaw.Trim().ToLowerInvariant()
+            : "whisper";
+        var sttChip = stt == "elevenlabs" ? "STT•EL" : "STT•local";
+        var cli = (EnvKeyHasValue(env, "CODEX_COMMAND") ? 1 : 0) +
+                  (EnvKeyHasValue(env, "CLAUDE_CODE_COMMAND") ? 1 : 0) +
+                  (EnvKeyHasValue(env, "OPENCLAW_COMMAND") ? 1 : 0);
+        UspRailLocalFirst = cli > 0 ? $"{sttChip} • CLI×{cli}" : sttChip;
     }
 
     private static string BuildFatClientInspectorHint(string appKind)

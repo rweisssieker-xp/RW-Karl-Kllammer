@@ -202,6 +202,8 @@ public partial class MainWindow : Window
 
     private void OnDashboardNavigateHistoryClick(object? sender, RoutedEventArgs e) => ViewModel.NavigateToHistory();
 
+    private void OnDashboardNavigateProactiveClick(object? sender, RoutedEventArgs e) => ViewModel.NavigateToAsk();
+
     private void OnOnboardingEnvClick(object? sender, RoutedEventArgs e) => ViewModel.OnboardingCheckEnvironment();
 
     private void OnOnboardingKnowledgeClick(object? sender, RoutedEventArgs e) => ViewModel.OnboardingOpenKnowledgeFolder();
