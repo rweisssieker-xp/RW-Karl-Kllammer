@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Threading;
+using CarolusNexus.Core;
 using ClippyRWAvalonia.Models;
 using ClippyRWAvalonia.Views;
 using Forms = System.Windows.Forms;

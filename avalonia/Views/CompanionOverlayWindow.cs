@@ -49,8 +49,8 @@ public sealed class CompanionOverlayWindow : Window
             Background = new SolidColorBrush(Avalonia.Media.Color.Parse("#338CF0A5")),
             BorderBrush = Avalonia.Media.Brush.Parse("#38FFFFFF"),
             BorderThickness = new Thickness(1),
-            HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
             Margin = new Thickness(0, 42, 0, 0),
             Opacity = 0.78
         };
@@ -263,7 +263,7 @@ public sealed class CompanionOverlayWindow : Window
                             _messageBlock,
                             new StackPanel
                             {
-                                Orientation = Orientation.Horizontal,
+                                Orientation = Avalonia.Layout.Orientation.Horizontal,
                                 Spacing = 5,
                                 Children =
                                 {
@@ -511,7 +511,7 @@ public sealed class CompanionOverlayWindow : Window
             CornerRadius = new CornerRadius(999),
             Background = Avalonia.Media.Brush.Parse("#9EDBFF"),
             Opacity = 0.6,
-            VerticalAlignment = VerticalAlignment.Center
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
         };
     }
 }

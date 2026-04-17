@@ -15,6 +15,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CarolusNexus.Core\CarolusNexus.Core.csproj" />
+    <ProjectReference Include="..\CarolusNexus.Platform.Windows\CarolusNexus.Platform.Windows.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Avalonia" Version="12.0.1" />
     <PackageReference Include="Avalonia.Desktop" Version="12.0.1" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.0.1" />

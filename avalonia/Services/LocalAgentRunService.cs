@@ -13,7 +13,7 @@ public sealed class LocalAgentRunService
         _workspaceService = workspaceService;
     }
 
-    public async Task<AgentRunResult> RunAsync(string agent, string prompt)
+    public async Task<AgentRunResult> RunAsync(string agent, string prompt, IReadOnlyList<string>? codexImagePaths = null)
     {
         var env = _workspaceService.ReadEnvFile();
         var normalizedAgent = (agent ?? string.Empty).Trim().ToLowerInvariant();
@@ -27,7 +27,7 @@ public sealed class LocalAgentRunService
         var timestamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
         var outputFilePath = Path.Combine(outputDirectory, $"karl-klammer-{normalizedAgent}-{timestamp}.txt");
 
-        var startInfo = BuildStartInfo(normalizedAgent, env, prompt, outputFilePath, workingDirectory);
+        var startInfo = BuildStartInfo(normalizedAgent, env, prompt, outputFilePath, workingDirectory, codexImagePaths);
         using var process = new Process { StartInfo = startInfo };
         if (!process.Start())
         {
@@ -80,7 +80,7 @@ public sealed class LocalAgentRunService
         };
     }
 
-    private ProcessStartInfo BuildStartInfo(string agent, Dictionary<string, string> env, string prompt, string outputFilePath, string workingDirectory)
+    private ProcessStartInfo BuildStartInfo(string agent, Dictionary<string, string> env, string prompt, string outputFilePath, string workingDirectory, IReadOnlyList<string>? codexImagePaths)
     {
         var startInfo = new ProcessStartInfo
         {
@@ -105,6 +105,18 @@ public sealed class LocalAgentRunService
                 AddArgument(startInfo, workingDirectory);
                 AddArgument(startInfo, "-o");
                 AddArgument(startInfo, outputFilePath);
+                if (codexImagePaths != null)
+                {
+                    foreach (var imagePath in codexImagePaths)
+                    {
+                        if (!string.IsNullOrWhiteSpace(imagePath) && File.Exists(imagePath))
+                        {
+                            AddArgument(startInfo, "-i");
+                            AddArgument(startInfo, imagePath);
+                        }
+                    }
+                }
+
                 AddArgument(startInfo, "-");
                 break;
             case "claude-code":

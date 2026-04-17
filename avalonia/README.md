@@ -56,6 +56,8 @@ Start-Avalonia.cmd
 - can transcribe imported audio files via ElevenLabs STT or local Whisper
 - can synthesize assistant responses to an MP3 via ElevenLabs and open the generated file
 - can launch local Codex, Claude Code, and OpenClaw runs and write their output to `codex output/`
+- **smart ask handoff**: German voice/text triggers (`nimm codex`, `nimm claude code`, `nimm openclaw`, plus `mit screen` for Codex JPEG attachments) run the same local CLI flows directly from the Ask tab; IDE windows and coding keywords can **auto-route** to Codex or OpenClaw without spelling the trigger
+- **voice USP**: response speech prefers ElevenLabs when keys exist, then falls back to **Windows SAPI** offline; quick prefix buttons insert handoff phrases into the prompt
 - includes a Windows tray icon and a global push-to-talk hotkey based on `PUSH_TO_TALK_KEY`
 - includes a cursor-following overlay companion window with state transitions for ready, listening, transcribing, thinking, speaking, and error
 - surfaces proactive Karl suggestions, operator metrics and trust-first execution hints in the main UI

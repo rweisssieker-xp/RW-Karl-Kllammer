@@ -299,6 +299,32 @@ public sealed class AssistantRuntimeService
         });
     }
 
+    public bool IsElevenLabsVoiceConfigured()
+    {
+        var env = _workspaceService.ReadEnvFile();
+        return !string.IsNullOrWhiteSpace(GetValueOrDefault(env, "ELEVENLABS_API_KEY", string.Empty))
+            && !string.IsNullOrWhiteSpace(GetValueOrDefault(env, "ELEVENLABS_VOICE_ID", string.Empty));
+    }
+
+    /// <summary>JPEG files for Codex <c>-i</c>, same folder pattern as legacy WinForms.</summary>
+    public IReadOnlyList<string> SaveScreenCapturesToCodexHandoffFolder()
+    {
+        var repoRoot = _workspaceService.RepoRoot;
+        var directory = Path.Combine(repoRoot, "codex output", "screen captures");
+        Directory.CreateDirectory(directory);
+        var timestamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+        var paths = new List<string>();
+        foreach (var cap in CaptureAllScreens())
+        {
+            var bytes = Convert.FromBase64String(cap.ImageBase64);
+            var path = Path.Combine(directory, $"karl-klammer-codex-screen-{timestamp}-screen{cap.ScreenIndex}.jpg");
+            File.WriteAllBytes(path, bytes);
+            paths.Add(path);
+        }
+
+        return paths;
+    }
+
     private static string NormalizeProvider(string provider)
     {
         var normalized = (provider ?? string.Empty).Trim().ToLowerInvariant();

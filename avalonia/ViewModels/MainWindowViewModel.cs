@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using CarolusNexus.Core;
+using CarolusNexus.Platform.Windows;
 using ClippyRWAvalonia.Models;
 using ClippyRWAvalonia.Services;
 
@@ -1439,13 +1441,54 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
             return;
         }
 
+        var promptRaw = AssistantPrompt.Trim();
+
         try
         {
             IsAssistantBusy = true;
+            _companionOverlayService.SetState("thinking", "routing request");
+
+            if (AgentHandoffTriggers.IsOpenClawTriggered(promptRaw))
+            {
+                await CompleteLocalAgentHandoffAsync("openclaw", AgentHandoffTriggers.RemoveOpenClawPrompt(promptRaw)).ConfigureAwait(false);
+                return;
+            }
+
+            if (AgentHandoffTriggers.IsClaudeCodeTriggered(promptRaw))
+            {
+                await CompleteLocalAgentHandoffAsync("claude-code", AgentHandoffTriggers.RemoveClaudeCodePrompt(promptRaw)).ConfigureAwait(false);
+                return;
+            }
+
+            if (AgentHandoffTriggers.IsCodexTriggered(promptRaw))
+            {
+                await CompleteCodexHandoffAsync(promptRaw).ConfigureAwait(false);
+                return;
+            }
+
+            var active = _workspaceService.GetActiveWindow();
+            var route = AgentHandoffTriggers.DetectIntentRoute(promptRaw, active);
+            if (string.Equals(route, "codex", StringComparison.OrdinalIgnoreCase))
+            {
+                StatusMessage = "Auto-routing to Codex from context…";
+                _windowsShellService.UpdateTooltip(StatusMessage);
+                await CompleteCodexHandoffAsync("nimm codex " + promptRaw).ConfigureAwait(false);
+                return;
+            }
+
+            if (string.Equals(route, "openclaw", StringComparison.OrdinalIgnoreCase))
+            {
+                StatusMessage = "Auto-routing to OpenClaw from context…";
+                _windowsShellService.UpdateTooltip(StatusMessage);
+                var routed = "nimm openclaw " + promptRaw;
+                await CompleteLocalAgentHandoffAsync("openclaw", AgentHandoffTriggers.RemoveOpenClawPrompt(routed)).ConfigureAwait(false);
+                return;
+            }
+
             StatusMessage = $"Asking {Provider}...";
             _companionOverlayService.SetState("thinking", $"asking {Provider}");
             var knowledgeChunks = UseKnowledgeForAsk && UseLocalKnowledge
-                ? _workspaceService.GetRelevantKnowledgeChunks(AssistantPrompt, 3)
+                ? _workspaceService.GetRelevantKnowledgeChunks(promptRaw, 3)
                 : [];
 
             var result = await _assistantRuntimeService.AskAsync(
@@ -1453,7 +1496,7 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
                 Model,
                 Mode,
                 SuggestAutomations,
-                AssistantPrompt.Trim(),
+                promptRaw,
                 IncludeScreens,
                 ConversationHistory.ToList(),
                 knowledgeChunks).ConfigureAwait(false);
@@ -1468,7 +1511,7 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
             RetrievalSources = BuildRetrievalSources(result);
             ConversationHistory.Add(new ConversationTurn
             {
-                UserTranscript = AssistantPrompt.Trim(),
+                UserTranscript = promptRaw,
                 AssistantResponse = AssistantResponse
             });
             StatusMessage = $"{result.Provider} reply ready.";
@@ -1499,6 +1542,85 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
         {
             IsAssistantBusy = false;
         }
+    }
+
+    public void AppendHandoffPrefix(string prefix)
+    {
+        var insert = (prefix ?? string.Empty).Trim();
+        if (insert.Length == 0)
+        {
+            return;
+        }
+
+        if (!insert.EndsWith(' '))
+        {
+            insert += " ";
+        }
+
+        var current = (AssistantPrompt ?? string.Empty).Trim();
+        AssistantPrompt = string.IsNullOrEmpty(current) ? insert.TrimEnd() : insert + current;
+    }
+
+    private async Task CompleteCodexHandoffAsync(string promptForStrip)
+    {
+        var inner = AgentHandoffTriggers.RemoveCodexPrompt(promptForStrip);
+        if (string.IsNullOrWhiteSpace(inner))
+        {
+            StatusMessage = "Say what Codex should do after the trigger.";
+            AssistantResponse = string.Empty;
+            RetrievalSources = "codex handoff: empty task";
+            _windowsShellService.UpdateTooltip(StatusMessage);
+            _companionOverlayService.ShowTransient("ready", StatusMessage);
+            return;
+        }
+
+        IReadOnlyList<string>? images = null;
+        if (AgentHandoffTriggers.ShouldAttachCodexScreens(promptForStrip))
+        {
+            StatusMessage = "Capturing screens for Codex…";
+            _windowsShellService.UpdateTooltip(StatusMessage);
+            images = _assistantRuntimeService.SaveScreenCapturesToCodexHandoffFolder();
+        }
+
+        await CompleteLocalAgentHandoffAsync("codex", inner, images).ConfigureAwait(false);
+    }
+
+    private async Task CompleteLocalAgentHandoffAsync(string agent, string strippedPrompt, IReadOnlyList<string>? codexImages = null)
+    {
+        if (string.IsNullOrWhiteSpace(strippedPrompt))
+        {
+            StatusMessage = $"Add a task for {agent}.";
+            AssistantResponse = string.Empty;
+            RetrievalSources = $"{agent} handoff: empty task";
+            _windowsShellService.UpdateTooltip(StatusMessage);
+            return;
+        }
+
+        StatusMessage = $"Running {agent}…";
+        _companionOverlayService.SetState("thinking", agent);
+        _windowsShellService.UpdateTooltip(StatusMessage);
+
+        var result = await _runService.RunAsync(agent, strippedPrompt, codexImages).ConfigureAwait(false);
+
+        AssistantResponse = result.ResponseText.Trim() + Environment.NewLine + Environment.NewLine + "---" + Environment.NewLine + "output file: " + result.OutputFilePath;
+        RetrievalSources = $"local agent handoff • {agent} • exit {result.ExitCode}";
+        _pendingActionPlan = new AssistantActionPlan();
+        ActionPlanPreview = "no pending action plan (local agent handoff)";
+        ActionPlanExecutionLog = "no plan executed yet";
+        ActionPlanState = "idle";
+        _nextPlanStepIndex = 0;
+        CurrentPlanStepSummary = "no active step";
+        ConversationHistory.Add(new ConversationTurn
+        {
+            UserTranscript = AssistantPrompt.Trim(),
+            AssistantResponse = AssistantResponse
+        });
+        StatusMessage = $"{agent} finished.";
+        _windowsShellService.UpdateTooltip(StatusMessage);
+        _companionOverlayService.ShowTransient("ready", $"{agent} done", 4200, "low");
+        _companionOverlayService.ClearTargetAnchor();
+        OnPropertyChanged(nameof(HasPendingActionPlan));
+        OnPropertyChanged(nameof(HasRemainingPlanSteps));
     }
 
     public async Task RunAssistantSmokeTestAsync()
@@ -1595,11 +1717,35 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
             IsAssistantBusy = true;
             StatusMessage = "Synthesizing speech...";
             _companionOverlayService.SetState("speaking", "rendering voice response");
-            LastGeneratedAudioPath = await _assistantRuntimeService.SynthesizeSpeechToFileAsync(AssistantResponse).ConfigureAwait(false);
-            _assistantRuntimeService.OpenFileWithShell(LastGeneratedAudioPath);
-            StatusMessage = "Opened generated speech file.";
-            _windowsShellService.UpdateTooltip(StatusMessage);
-            _companionOverlayService.ShowTransient("speaking", "opened generated speech file");
+
+            if (_assistantRuntimeService.IsElevenLabsVoiceConfigured())
+            {
+                try
+                {
+                    LastGeneratedAudioPath = await _assistantRuntimeService.SynthesizeSpeechToFileAsync(AssistantResponse).ConfigureAwait(false);
+                    _assistantRuntimeService.OpenFileWithShell(LastGeneratedAudioPath);
+                    StatusMessage = "Opened generated speech file.";
+                    _windowsShellService.UpdateTooltip(StatusMessage);
+                    _companionOverlayService.ShowTransient("speaking", "opened generated speech file");
+                    return;
+                }
+                catch
+                {
+                    // try Windows SAPI below
+                }
+            }
+
+            var spoken = await Task.Run(() => WindowsSpeechFallback.TrySpeak(AssistantResponse)).ConfigureAwait(false);
+            if (spoken)
+            {
+                LastGeneratedAudioPath = string.Empty;
+                StatusMessage = "Spoke response with Windows voice (offline fallback).";
+                _windowsShellService.UpdateTooltip(StatusMessage);
+                _companionOverlayService.ShowTransient("speaking", "windows voice playback");
+                return;
+            }
+
+            throw new InvalidOperationException("Speech unavailable: add ELEVENLABS_API_KEY and ELEVENLABS_VOICE_ID to .env, or install a Windows SAPI voice.");
         }
         catch (Exception exception)
         {

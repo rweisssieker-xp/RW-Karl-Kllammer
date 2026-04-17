@@ -1,3 +1,4 @@
+using CarolusNexus.Core;
 using ClippyRWAvalonia.Models;
 
 namespace ClippyRWAvalonia.Services;

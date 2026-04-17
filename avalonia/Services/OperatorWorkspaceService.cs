@@ -1,9 +1,10 @@
 using System.IO.Compression;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using CarolusNexus.Core;
+using CarolusNexus.Platform.Windows;
 using ClippyRWAvalonia.Models;
 
 namespace ClippyRWAvalonia.Services;
@@ -20,16 +21,17 @@ public sealed class OperatorWorkspaceService
 
     public OperatorWorkspaceService()
     {
-        RepoRoot = FindRepoRoot();
-        WindowsRoot = Path.Combine(RepoRoot, "windows");
-        DataRoot = Path.Combine(WindowsRoot, "data");
-        KnowledgeRoot = Path.Combine(DataRoot, "knowledge");
-        EnvPath = ResolvePreferredEnvPath();
-        SettingsPath = Path.Combine(DataRoot, "settings.json");
-        RecipePath = Path.Combine(DataRoot, "automation-recipes.json");
-        WatchSessionsPath = Path.Combine(DataRoot, "watch-sessions.json");
-        ActionHistoryPath = Path.Combine(DataRoot, "action-history.json");
-        KnowledgeIndexPath = Path.Combine(DataRoot, "knowledge-index.json");
+        var layout = WorkspacePathResolver.CreateFromDefaultBase();
+        RepoRoot = layout.RepoRoot;
+        WindowsRoot = layout.WindowsRoot;
+        DataRoot = layout.DataRoot;
+        KnowledgeRoot = layout.KnowledgeRoot;
+        EnvPath = layout.EnvPath;
+        SettingsPath = layout.SettingsPath;
+        RecipePath = layout.RecipePath;
+        WatchSessionsPath = layout.WatchSessionsPath;
+        ActionHistoryPath = layout.ActionHistoryPath;
+        KnowledgeIndexPath = layout.KnowledgeIndexPath;
     }
 
     public string RepoRoot { get; }
@@ -360,59 +362,7 @@ public sealed class OperatorWorkspaceService
         return values;
     }
 
-    public ActiveWindowInfo GetActiveWindow()
-    {
-        if (!OperatingSystem.IsWindows())
-        {
-            return new ActiveWindowInfo
-            {
-                ProcessName = "unsupported",
-                WindowTitle = "active window inspection is only available on Windows",
-                AppKind = "unsupported",
-                DesktopFramework = "unsupported"
-            };
-        }
-
-        try
-        {
-            var handle = GetForegroundWindow();
-            if (handle == IntPtr.Zero)
-            {
-                return new ActiveWindowInfo();
-            }
-
-            GetWindowThreadProcessId(handle, out var processId);
-            var processName = "unknown app";
-            if (processId != 0)
-            {
-                using var process = System.Diagnostics.Process.GetProcessById((int)processId);
-                processName = process.ProcessName;
-            }
-
-            var titleBuilder = new StringBuilder(512);
-            var classBuilder = new StringBuilder(256);
-            GetWindowText(handle, titleBuilder, titleBuilder.Capacity);
-            GetClassName(handle, classBuilder, classBuilder.Capacity);
-            GetWindowRect(handle, out var rect);
-
-            return new ActiveWindowInfo
-            {
-                ProcessName = processName,
-                WindowTitle = titleBuilder.ToString().Trim(),
-                WindowClassName = classBuilder.ToString().Trim(),
-                AppKind = DetectAppKind(processName),
-                DesktopFramework = DetectDesktopFramework(classBuilder.ToString().Trim(), processName),
-                Left = rect.Left,
-                Top = rect.Top,
-                Width = Math.Max(0, rect.Right - rect.Left),
-                Height = Math.Max(0, rect.Bottom - rect.Top)
-            };
-        }
-        catch
-        {
-            return new ActiveWindowInfo();
-        }
-    }
+    public ActiveWindowInfo GetActiveWindow() => WindowsForegroundWindow.GetActiveWindow();
 
     private Dictionary<string, string> ReadStringDictionary(string path)
     {
@@ -771,18 +721,6 @@ public sealed class OperatorWorkspaceService
         }
     }
 
-    private string ResolvePreferredEnvPath()
-    {
-        var preferred = Path.Combine(WindowsRoot, ".env");
-        if (File.Exists(preferred))
-        {
-            return preferred;
-        }
-
-        var publishCandidate = Path.Combine(WindowsRoot, "bin", "Release", "net10.0-windows", "win-arm64", ".env");
-        return File.Exists(publishCandidate) ? publishCandidate : preferred;
-    }
-
     private static string[] Tokenize(string text)
     {
         return Regex.Split(text.ToLowerInvariant(), @"[^a-z0-9äöüß]+")
@@ -817,84 +755,4 @@ public sealed class OperatorWorkspaceService
         return match.Success ? match.Value : string.Empty;
     }
 
-    private static string FindRepoRoot()
-    {
-        var current = AppContext.BaseDirectory;
-        for (var i = 0; i < 8 && !string.IsNullOrWhiteSpace(current); i++)
-        {
-            var candidate = Path.GetFullPath(Path.Combine(current, string.Concat(Enumerable.Repeat("..\\", i))));
-            if (Directory.Exists(Path.Combine(candidate, "windows")))
-            {
-                return candidate;
-            }
-        }
-
-        return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
-    }
-
-    private static string DetectAppKind(string processName)
-    {
-        return (processName ?? string.Empty).Trim().ToLowerInvariant() switch
-        {
-            "ax32" => "ax",
-            "chrome" or "msedge" or "firefox" or "brave" or "opera" => "browser",
-            "explorer" => "explorer",
-            "code" or "devenv" or "rider64" or "idea64" or "pycharm64" => "ide",
-            "outlook" or "olk" => "mail",
-            "slack" or "teams" or "discord" or "telegram" => "messenger",
-            _ => "generic"
-        };
-    }
-
-    private static string DetectDesktopFramework(string windowClassName, string processName)
-    {
-        var normalizedClass = (windowClassName ?? string.Empty).Trim();
-        var normalizedProcess = (processName ?? string.Empty).Trim().ToLowerInvariant();
-
-        if (normalizedClass.StartsWith("WindowsForms10", StringComparison.OrdinalIgnoreCase))
-        {
-            return "winforms";
-        }
-
-        if (normalizedClass.StartsWith("HwndWrapper", StringComparison.OrdinalIgnoreCase))
-        {
-            return "wpf";
-        }
-
-        if (normalizedClass.StartsWith("SunAwt", StringComparison.OrdinalIgnoreCase) || normalizedProcess.Contains("java", StringComparison.OrdinalIgnoreCase))
-        {
-            return "java";
-        }
-
-        if (normalizedClass.StartsWith("Qt", StringComparison.OrdinalIgnoreCase))
-        {
-            return "qt";
-        }
-
-        return "classic";
-    }
-
-    [DllImport("user32.dll")]
-    private static extern IntPtr GetForegroundWindow();
-
-    [DllImport("user32.dll")]
-    private static extern bool GetWindowRect(IntPtr hWnd, out RECT rect);
-
-    [DllImport("user32.dll", SetLastError = true)]
-    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
-
-    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-    private static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
-
-    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-    private static extern int GetClassName(IntPtr hWnd, StringBuilder text, int count);
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct RECT
-    {
-        public int Left;
-        public int Top;
-        public int Right;
-        public int Bottom;
-    }
 }

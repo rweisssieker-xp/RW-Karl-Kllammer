@@ -58,6 +58,10 @@ public partial class MainWindow : Window
     private void OnRefreshActiveWindowClick(object? sender, RoutedEventArgs e) => ViewModel.RefreshActiveWindow();
     private async void OnRunSelectedAgentClick(object? sender, RoutedEventArgs e) => await ViewModel.RunSelectedAgentAsync();
     private async void OnAskAssistantClick(object? sender, RoutedEventArgs e) => await ViewModel.RunAssistantAsync();
+    private void OnHandoffCodexClick(object? sender, RoutedEventArgs e) => ViewModel.AppendHandoffPrefix("nimm codex");
+    private void OnHandoffCodexScreenClick(object? sender, RoutedEventArgs e) => ViewModel.AppendHandoffPrefix("nimm codex mit screen");
+    private void OnHandoffClaudeCodeClick(object? sender, RoutedEventArgs e) => ViewModel.AppendHandoffPrefix("nimm claude code");
+    private void OnHandoffOpenClawClick(object? sender, RoutedEventArgs e) => ViewModel.AppendHandoffPrefix("nimm openclaw");
     private async void OnAssistantSmokeTestClick(object? sender, RoutedEventArgs e) => await ViewModel.RunAssistantSmokeTestAsync();
     private async void OnSpeakResponseClick(object? sender, RoutedEventArgs e) => await ViewModel.SynthesizeCurrentResponseAsync();
     private async void OnRunActionPlanClick(object? sender, RoutedEventArgs e) => await ViewModel.RunPendingActionPlanAsync();

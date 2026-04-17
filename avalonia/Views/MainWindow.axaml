@@ -85,6 +85,14 @@
               <TextBlock Classes="section" Text="Assistant Runtime" />
               <CheckBox Content="include screenshots" IsChecked="{Binding IncludeScreens}" />
               <CheckBox Content="use local knowledge in ask flow" IsChecked="{Binding UseKnowledgeForAsk}" />
+              <TextBlock Text="Smart handoff: say nimm codex, nimm claude code, or nimm openclaw in the prompt — or let Karl auto-route from an IDE window or coding keywords. Codex: add mit screen to attach monitor JPEGs. Speak response uses ElevenLabs when configured, otherwise Windows voice." TextWrapping="Wrap" Foreground="#8CB8E0" />
+              <WrapPanel ItemSpacing="8">
+                <TextBlock Text="prefix" VerticalAlignment="Center" Foreground="#9CB3D1" />
+                <Button Classes="secondary" Content="nimm codex" Click="OnHandoffCodexClick" />
+                <Button Classes="secondary" Content="nimm codex mit screen" Click="OnHandoffCodexScreenClick" />
+                <Button Classes="secondary" Content="nimm claude code" Click="OnHandoffClaudeCodeClick" />
+                <Button Classes="secondary" Content="nimm openclaw" Click="OnHandoffOpenClawClick" />
+              </WrapPanel>
               <TextBlock Text="prompt" />
               <TextBox Text="{Binding AssistantPrompt}" AcceptsReturn="True" TextWrapping="Wrap" Height="280" />
               <TextBlock Text="AX fat-client support is active via ax.* plan steps with form/dialog/tab guards." Foreground="#9CB3D1" TextWrapping="Wrap" />

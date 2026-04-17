@@ -14,14 +14,12 @@
       <Setter Property="FontWeight" Value="Bold" />
       <Setter Property="Foreground" Value="#7FD6E4" />
       <Setter Property="LetterSpacing" Value="1.4" />
-      <Setter Property="TextTransform" Value="Uppercase" />
     </Style>
     <Style Selector="TextBlock.section">
       <Setter Property="FontSize" Value="12" />
       <Setter Property="FontWeight" Value="Bold" />
       <Setter Property="Foreground" Value="#8FD1FF" />
       <Setter Property="LetterSpacing" Value="0.8" />
-      <Setter Property="TextTransform" Value="Uppercase" />
     </Style>
     <Style Selector="TextBlock.muted">
       <Setter Property="Foreground" Value="#8EA6C6" />
@@ -34,7 +32,6 @@
     <Style Selector="TextBlock.metricLabel">
       <Setter Property="FontSize" Value="11" />
       <Setter Property="Foreground" Value="#8EA6C6" />
-      <Setter Property="TextTransform" Value="Uppercase" />
       <Setter Property="LetterSpacing" Value="1.1" />
     </Style>
     <Style Selector="Border.card">
@@ -49,11 +46,7 @@
       </Setter>
       <Setter Property="BorderBrush" Value="#24364F" />
       <Setter Property="BorderThickness" Value="1" />
-      <Setter Property="BoxShadow">
-        <BoxShadows>
-          <BoxShadow Blur="28" OffsetY="14" Color="#26000000" />
-        </BoxShadows>
-      </Setter>
+      <Setter Property="BoxShadow" Value="0 14 28 0 #26000000" />
     </Style>
     <Style Selector="Border.heroCard">
       <Setter Property="CornerRadius" Value="28" />
@@ -67,11 +60,7 @@
           <GradientStop Color="#0A111C" Offset="1" />
         </LinearGradientBrush>
       </Setter>
-      <Setter Property="BoxShadow">
-        <BoxShadows>
-          <BoxShadow Blur="34" OffsetY="18" Color="#33000000" />
-        </BoxShadows>
-      </Setter>
+      <Setter Property="BoxShadow" Value="0 18 34 0 #33000000" />
     </Style>
     <Style Selector="Border.metric">
       <Setter Property="CornerRadius" Value="20" />

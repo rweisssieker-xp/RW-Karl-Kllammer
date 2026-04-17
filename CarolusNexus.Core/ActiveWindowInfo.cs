@@ -1,4 +1,4 @@
-namespace ClippyRWAvalonia.Models;
+namespace CarolusNexus.Core;
 
 public sealed class ActiveWindowInfo
 {
@@ -16,13 +16,8 @@ public sealed class ActiveWindowInfo
     public int CenterX => Left + (Width / 2);
     public int CenterY => Top + (Height / 2);
 
-    public string DisplayName
-    {
-        get
-        {
-            return string.IsNullOrWhiteSpace(WindowTitle)
-                ? ProcessName
-                : $"{ProcessName} - {WindowTitle}";
-        }
-    }
+    public string DisplayName =>
+        string.IsNullOrWhiteSpace(WindowTitle)
+            ? ProcessName
+            : $"{ProcessName} - {WindowTitle}";
 }
