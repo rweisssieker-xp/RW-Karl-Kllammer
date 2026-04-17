@@ -1,0 +1,597 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:ClippyRWAvalonia.ViewModels"
+        x:Class="ClippyRWAvalonia.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Width="1540"
+        Height="980"
+        MinWidth="1100"
+        MinHeight="760"
+        Background="#0B111B"
+        Foreground="#F7FAFD"
+        Title="{Binding Title}"
+        mc:Ignorable="d">
+
+  <Grid RowDefinitions="Auto,*" Margin="20" RowSpacing="16">
+    <Border Classes="heroCard" Grid.Row="0">
+      <Grid ColumnDefinitions="1.3*,0.9*" RowDefinitions="Auto,Auto,Auto" RowSpacing="16" ColumnSpacing="20">
+        <StackPanel Spacing="8">
+          <TextBlock Classes="kicker" Text="Windows Operator Platform" />
+          <TextBlock Text="Carolus Nexus" FontSize="30" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding Subtitle}" Classes="muted" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding StatusMessage}" Foreground="#D9F4B1" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="1" Spacing="12">
+          <WrapPanel HorizontalAlignment="Right"
+                     VerticalAlignment="Top"
+                     ItemSpacing="8">
+            <Border Classes="badge"><TextBlock Text="{Binding LayoutMode}" /></Border>
+            <Border Classes="badge"><TextBlock Text="{Binding EnvironmentState}" /></Border>
+            <Border Classes="badge"><TextBlock Text="{Binding SpeechState}" /></Border>
+            <Border Classes="badge"><TextBlock Text="{Binding AutomationState}" /></Border>
+            <Border Classes="badge"><TextBlock Text="{Binding KnowledgeState}" /></Border>
+          </WrapPanel>
+          <Border Classes="metric">
+            <StackPanel Spacing="6">
+              <TextBlock Classes="metricLabel" Text="Runtime Pulse" />
+              <TextBlock Text="{Binding RuntimeSummary}" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding CountsSummary}" Classes="muted" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+
+        <WrapPanel Grid.Row="1" Grid.ColumnSpan="2" ItemSpacing="10">
+          <Button Classes="primary" Content="refresh all" Click="OnRefreshClick" />
+          <Button Classes="secondary" Content="save settings" Click="OnSaveSettingsClick" />
+          <Button Classes="secondary" Content="reindex knowledge" Click="OnReindexKnowledgeClick" />
+          <Button Classes="secondary" Content="refresh active app" Click="OnRefreshActiveWindowClick" />
+          <Button Classes="secondary" Content="export diagnostics" Click="OnExportDiagnosticsClick" />
+        </WrapPanel>
+
+        <Grid Grid.Row="2" Grid.ColumnSpan="2" ColumnDefinitions="*,*,*" ColumnSpacing="12">
+          <Border Classes="metric">
+            <StackPanel Spacing="4">
+              <TextBlock Classes="metricLabel" Text="Operator Memory" />
+              <TextBlock Classes="metricValue" Text="{Binding CountsSummary}" />
+              <TextBlock Text="{Binding OperatorMetrics}" Classes="muted" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+          <Border Classes="metric" Grid.Column="1">
+            <StackPanel Spacing="4">
+              <TextBlock Classes="metricLabel" Text="Live Context" />
+              <TextBlock Classes="metricValue" Text="{Binding EnvironmentState}" />
+              <TextBlock Text="{Binding ActiveAppSummary}" Classes="muted" TextWrapping="Wrap" MaxHeight="56" />
+            </StackPanel>
+          </Border>
+          <Border Classes="metric" Grid.Column="2">
+            <StackPanel Spacing="4">
+              <TextBlock Classes="metricLabel" Text="Environment" />
+              <TextBlock Classes="metricValue" Text="{Binding Provider}" />
+              <TextBlock Text="{Binding EnvPath}" Classes="muted" TextWrapping="Wrap" MaxHeight="56" />
+            </StackPanel>
+          </Border>
+        </Grid>
+      </Grid>
+    </Border>
+
+    <TabControl Grid.Row="1">
+      <TabItem Header="Ask">
+        <Grid Margin="0,16,0,0" ColumnDefinitions="460,*" ColumnSpacing="16">
+          <Border Classes="card" Grid.Column="0">
+            <StackPanel Spacing="12">
+              <TextBlock Classes="section" Text="Assistant Runtime" />
+              <CheckBox Content="include screenshots" IsChecked="{Binding IncludeScreens}" />
+              <CheckBox Content="use local knowledge in ask flow" IsChecked="{Binding UseKnowledgeForAsk}" />
+              <TextBlock Text="prompt" />
+              <TextBox Text="{Binding AssistantPrompt}" AcceptsReturn="True" TextWrapping="Wrap" Height="280" />
+              <TextBlock Text="AX fat-client support is active via ax.* plan steps with form/dialog/tab guards." Foreground="#9CB3D1" TextWrapping="Wrap" />
+              <WrapPanel ItemSpacing="8">
+                <Button Classes="primary" Content="ask now" Click="OnAskAssistantClick" />
+                <Button Classes="secondary" Content="smoke test" Click="OnAssistantSmokeTestClick" />
+                <Button Classes="secondary" Content="import audio + transcribe" Click="OnImportAudioClick" />
+                <Button Classes="secondary" Content="start push-to-talk" Click="OnStartSpeechCaptureClick" />
+                <Button Classes="secondary" Content="stop + ask" Click="OnStopSpeechCaptureClick" />
+                <Button Classes="secondary" Content="cancel recording" Click="OnCancelSpeechCaptureClick" />
+                <Button Classes="secondary" Content="clear conversation" Click="OnClearConversationClick" />
+                <Button Classes="secondary" Content="run plan" Click="OnRunActionPlanClick" IsEnabled="{Binding HasPendingActionPlan}" />
+                <Button Classes="secondary" Content="run next step" Click="OnRunNextActionPlanStepClick" IsEnabled="{Binding HasRemainingPlanSteps}" />
+                <Button Classes="secondary" Content="save plan as ritual" Click="OnSavePendingPlanAsRecipeClick" IsEnabled="{Binding HasPendingActionPlan}" />
+                <Button Classes="secondary" Content="clear plan" Click="OnClearActionPlanClick" />
+              </WrapPanel>
+              <TextBlock Text="{Binding SpeechCaptureState}" Foreground="#B8CAE4" />
+              <TextBlock Text="last transcript" />
+              <TextBox Text="{Binding TranscriptText}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="170" />
+            </StackPanel>
+          </Border>
+
+          <Border Classes="card" Grid.Column="1">
+            <StackPanel Spacing="12">
+              <TextBlock Classes="section" Text="Assistant Response" />
+              <WrapPanel ItemSpacing="8">
+                <Button Classes="secondary" Content="speak response" Click="OnSpeakResponseClick" />
+                <TextBlock Text="{Binding LastGeneratedAudioPath}" Width="360" TextWrapping="Wrap" Foreground="#9CB3D1" />
+              </WrapPanel>
+              <TextBox Text="{Binding AssistantResponse}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="420" />
+              <TextBlock Classes="section" Text="Retrieval + Context" />
+              <TextBox Text="{Binding RetrievalSources}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="170" />
+              <TextBlock Classes="section" Text="Action Plan Preview" />
+              <TextBlock Text="{Binding ActionPlanState}" Foreground="#B8CAE4" />
+              <TextBlock Text="{Binding CurrentPlanStepSummary}" Foreground="#9CB3D1" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding SafetyPolicySummary}" Foreground="#FFDFA5" TextWrapping="Wrap" />
+              <TextBox Text="{Binding ActionPlanPreview}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="150" />
+              <TextBlock Classes="section" Text="Action Plan Execution" />
+              <TextBox Text="{Binding ActionPlanExecutionLog}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="170" />
+            </StackPanel>
+          </Border>
+        </Grid>
+      </TabItem>
+
+      <TabItem Header="Dashboard">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+          <WrapPanel Margin="0,16,0,0" ItemSpacing="16">
+            <Border Classes="card" Width="460" MinWidth="320">
+              <StackPanel Spacing="12">
+                <TextBlock Classes="section" Text="Environment + Routing" />
+                <TextBlock Classes="kicker" Text="Operator Brain" />
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                  <Border Classes="badge"><TextBlock Text="{Binding Provider}" /></Border>
+                  <Border Classes="badge"><TextBlock Text="{Binding Mode}" /></Border>
+                </Grid>
+                <TextBlock Text="{Binding Model}" Foreground="#B9CAE1" />
+                <TextBlock Text="{Binding EnvSummary}" TextWrapping="Wrap" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card" Width="460" MinWidth="320">
+              <StackPanel Spacing="12">
+                <TextBlock Classes="section" Text="Knowledge + Memory" />
+                <TextBlock Classes="kicker" Text="Reusable Memory" />
+                <TextBlock Text="{Binding KnowledgeStatus}" />
+                <TextBlock Text="{Binding CountsSummary}" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding OperatorMetrics}" TextWrapping="Wrap" Foreground="#9CB3D1" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card" Width="460" MinWidth="320">
+              <StackPanel Spacing="12">
+                <TextBlock Classes="section" Text="Live Context" />
+                <TextBlock Classes="kicker" Text="Current Surface" />
+                <TextBlock Text="{Binding ActiveAppSummary}" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding AxSuggestedActions}" TextWrapping="Wrap" Foreground="#9CB3D1" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card" Width="460" MinWidth="320">
+              <StackPanel Spacing="12">
+                <TextBlock Classes="section" Text="Proactive Karl" />
+                <TextBlock Classes="kicker" Text="Companion Guidance" />
+                <TextBlock Text="{Binding ProactiveSuggestionSummary}" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding SafetyPolicySummary}" TextWrapping="Wrap" Foreground="#FFDFA5" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card" Width="460" MinWidth="320">
+              <StackPanel Spacing="12">
+                <TextBlock Classes="section" Text="Recent Rituals" />
+                <TextBlock Classes="kicker" Text="Operator Patterns" />
+                <ItemsControl ItemsSource="{Binding Recipes}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card" Width="460" MinWidth="320">
+              <StackPanel Spacing="12">
+                <TextBlock Classes="section" Text="Recent Watch Sessions" />
+                <TextBlock Classes="kicker" Text="Captured Guidance" />
+                <ItemsControl ItemsSource="{Binding WatchSessions}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <TextBlock Text="{Binding Prompt}" TextTrimming="CharacterEllipsis" MaxWidth="380" />
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Border>
+          </WrapPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem Header="Setup">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+          <Grid Margin="0,16,0,0" ColumnDefinitions="420,*" ColumnSpacing="16">
+            <Border Classes="card" Grid.Column="0">
+              <StackPanel Spacing="14">
+                <TextBlock Classes="section" Text="Provider + Mode" />
+                <TextBlock Text="provider" />
+                <ComboBox ItemsSource="{Binding ProviderOptions}" SelectedItem="{Binding Provider}" />
+                <TextBlock Text="mode" />
+                <ComboBox ItemsSource="{Binding CompanionModes}" SelectedItem="{Binding Mode}" />
+                <TextBlock Text="model" />
+                <TextBox Text="{Binding Model}" />
+                <CheckBox Content="speak responses" IsChecked="{Binding SpeakResponses}" />
+                <CheckBox Content="use local knowledge" IsChecked="{Binding UseLocalKnowledge}" />
+                <CheckBox Content="suggest automations" IsChecked="{Binding SuggestAutomations}" />
+                <WrapPanel ItemSpacing="10">
+                  <Button Classes="primary" Content="save settings" Click="OnSaveSettingsClick" />
+                  <Button Classes="secondary" Content="refresh state" Click="OnRefreshClick" />
+                </WrapPanel>
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card" Grid.Column="1">
+              <StackPanel Spacing="14">
+                <TextBlock Classes="section" Text="Health + Environment" />
+                <TextBlock Text="{Binding EnvPath}" TextWrapping="Wrap" />
+                <TextBox Text="{Binding EnvSummary}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="220" />
+                <TextBlock Text="This tab replaces the WinForms setup wizard and provider summary. It edits the existing settings.json while keeping the current .env file in the Windows runtime as the secret source." TextWrapping="Wrap" Foreground="#C4D5EB" />
+              </StackPanel>
+            </Border>
+          </Grid>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem Header="Knowledge">
+        <Grid Margin="0,16,0,0" ColumnDefinitions="420,*" ColumnSpacing="16">
+          <Border Classes="card" Grid.Column="0">
+            <Grid RowDefinitions="Auto,Auto,*" RowSpacing="12">
+              <TextBlock Classes="section" Text="Knowledge Manager" />
+              <StackPanel Grid.Row="1" Spacing="8">
+                <TextBox PlaceholderText="search documents or indexed text" Text="{Binding KnowledgeSearch}" />
+                <WrapPanel ItemSpacing="8">
+                  <Button Classes="primary" Content="search" Click="OnKnowledgeSearchClick" />
+                  <Button Classes="secondary" Content="import files" Click="OnImportKnowledgeClick" />
+                  <Button Classes="secondary" Content="remove doc" Click="OnDeleteKnowledgeClick" />
+                  <Button Classes="secondary" Content="reindex" Click="OnReindexKnowledgeClick" />
+                  <Button Classes="secondary" Content="suggest ritual from doc" Click="OnSuggestKnowledgeRecipeClick" />
+                </WrapPanel>
+              </StackPanel>
+              <ListBox Grid.Row="2"
+                       ItemsSource="{Binding KnowledgeDocuments}"
+                       SelectionChanged="OnKnowledgeSelectionChanged" />
+            </Grid>
+          </Border>
+
+          <Border Classes="card" Grid.Column="1">
+            <StackPanel Spacing="12">
+              <TextBlock Classes="section" Text="Document Preview" />
+              <TextBlock Text="{Binding KnowledgeStatus}" Foreground="#B8CAE4" />
+              <TextBox Text="{Binding SelectedKnowledgePreview}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="640" />
+            </StackPanel>
+          </Border>
+        </Grid>
+      </TabItem>
+
+      <TabItem Header="Rituals">
+        <Grid Margin="0,16,0,0" ColumnDefinitions="360,420,*" ColumnSpacing="16">
+          <Border Classes="card" Grid.Column="0">
+            <Grid RowDefinitions="Auto,Auto,Auto,*" RowSpacing="12">
+              <TextBlock Classes="section" Text="Ritual Library" />
+              <StackPanel Grid.Row="1" Spacing="8">
+                <TextBox PlaceholderText="search rituals" Text="{Binding RitualSearch}" />
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                  <TextBox PlaceholderText="category filter" Text="{Binding RitualCategoryFilter}" />
+                  <TextBox Grid.Column="1" PlaceholderText="source filter" Text="{Binding RitualSourceFilter}" />
+                  <TextBox Grid.Column="2" PlaceholderText="risk filter" Text="{Binding RitualRiskFilter}" />
+                </Grid>
+                <Button Classes="primary" Content="filter rituals" Click="OnRitualFilterClick" HorizontalAlignment="Left" />
+              </StackPanel>
+              <TextBlock Grid.Row="2" Text="{Binding RitualStats}" Foreground="#9CB3D1" TextWrapping="Wrap" />
+              <ListBox Grid.Row="1"
+                       Grid.RowSpan="3"
+                       ItemsSource="{Binding Recipes}"
+                       SelectionChanged="OnRecipeSelectionChanged" />
+            </Grid>
+          </Border>
+
+          <Border Classes="card" Grid.Column="1">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="12">
+              <TextBlock Classes="section" Text="Ritual Builder" />
+              <TextBlock Text="name" />
+              <TextBox Text="{Binding SelectedRecipeName}" />
+              <TextBlock Text="description" />
+              <TextBox Text="{Binding SelectedRecipeDescription}" AcceptsReturn="True" TextWrapping="Wrap" Height="70" />
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <StackPanel>
+                  <TextBlock Text="mode" />
+                  <ComboBox ItemsSource="{Binding CompanionModes}" SelectedItem="{Binding SelectedRecipeMode}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                  <TextBlock Text="category" />
+                  <TextBox Text="{Binding SelectedRecipeCategory}" />
+                </StackPanel>
+              </Grid>
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <StackPanel>
+                  <TextBlock Text="source type" />
+                  <TextBox Text="{Binding SelectedRecipeSourceType}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                  <TextBlock Text="risk" />
+                  <TextBox Text="{Binding SelectedRecipeRisk}" />
+                </StackPanel>
+              </Grid>
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <StackPanel>
+                  <TextBlock Text="guard app" />
+                  <TextBox Text="{Binding SelectedRecipeGuardApp}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                  <TextBlock Text="guard form" />
+                  <TextBox Text="{Binding SelectedRecipeGuardForm}" />
+                </StackPanel>
+              </Grid>
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <StackPanel>
+                  <TextBlock Text="guard dialog" />
+                  <TextBox Text="{Binding SelectedRecipeGuardDialog}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                  <TextBlock Text="guard tab" />
+                  <TextBox Text="{Binding SelectedRecipeGuardTab}" />
+                </StackPanel>
+              </Grid>
+              <CheckBox Content="enabled" IsChecked="{Binding SelectedRecipeEnabled}" />
+              <TextBlock Text="tags" />
+              <TextBox Text="{Binding SelectedRecipeTags}" />
+              <TextBlock Text="knowledge sources" />
+              <TextBox Text="{Binding SelectedRecipeKnowledgeSources}" AcceptsReturn="True" TextWrapping="Wrap" Height="80" />
+              <TextBlock Text="{Binding SelectedRitualRunStatus}" Foreground="#9CB3D1" />
+              <TextBlock Text="mode" />
+              <TextBlock Text="prompt / workflow" />
+              <TextBox Text="{Binding SelectedRecipePrompt}" AcceptsReturn="True" TextWrapping="Wrap" Height="160" />
+              <WrapPanel ItemSpacing="8">
+                <Button Classes="primary" Content="save ritual" Click="OnSaveRecipeClick" />
+                <Button Classes="secondary" Content="delete ritual" Click="OnDeleteRecipeClick" />
+                <Button Classes="secondary" Content="clone ritual" Click="OnCloneRecipeClick" />
+                <Button Classes="secondary" Content="archive ritual" Click="OnArchiveRecipeClick" />
+                <Button Classes="secondary" Content="dry run" Click="OnDryRunSelectedRecipeClick" />
+                <Button Classes="secondary" Content="run ritual" Click="OnRunSelectedRecipeClick" />
+                <Button Classes="secondary" Content="run next step" Click="OnRunNextSelectedRecipeStepClick" />
+              </WrapPanel>
+            </StackPanel>
+            </ScrollViewer>
+          </Border>
+
+          <Border Classes="card" Grid.Column="2">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+              <StackPanel Spacing="12">
+                <TextBlock Classes="section" Text="Structured Steps" />
+                <ListBox ItemsSource="{Binding SelectedRecipeSteps}" SelectionChanged="OnRecipeStepSelectionChanged" Height="180" />
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                  <StackPanel>
+                    <TextBlock Text="action type" />
+                    <TextBox Text="{Binding RitualStepActionType}" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="risk" />
+                    <TextBox Text="{Binding RitualStepRisk}" />
+                  </StackPanel>
+                </Grid>
+                <TextBlock Text="action argument" />
+                <TextBox Text="{Binding RitualStepActionArgument}" AcceptsReturn="True" TextWrapping="Wrap" Height="90" />
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                  <StackPanel>
+                    <TextBlock Text="wait ms" />
+                    <TextBox Text="{Binding RitualStepWaitMsText}" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="retry count" />
+                    <TextBox Text="{Binding RitualStepRetryCountText}" />
+                  </StackPanel>
+                </Grid>
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                  <StackPanel>
+                    <TextBlock Text="if app" />
+                    <TextBox Text="{Binding RitualStepIfApp}" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="if form" />
+                    <TextBox Text="{Binding RitualStepIfForm}" />
+                  </StackPanel>
+                </Grid>
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                  <StackPanel>
+                    <TextBlock Text="if dialog" />
+                    <TextBox Text="{Binding RitualStepIfDialog}" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="if tab" />
+                    <TextBox Text="{Binding RitualStepIfTab}" />
+                  </StackPanel>
+                </Grid>
+                <TextBlock Text="on fail" />
+                <TextBox Text="{Binding RitualStepOnFail}" />
+                <WrapPanel ItemSpacing="8">
+                  <Button Classes="primary" Content="add / update step" Click="OnAddOrUpdateRecipeStepClick" />
+                  <Button Classes="secondary" Content="remove step" Click="OnRemoveRecipeStepClick" />
+                  <Button Classes="secondary" Content="duplicate step" Click="OnDuplicateRecipeStepClick" />
+                  <Button Classes="secondary" Content="move up" Click="OnMoveRecipeStepUpClick" />
+                  <Button Classes="secondary" Content="move down" Click="OnMoveRecipeStepDownClick" />
+                </WrapPanel>
+
+                <TextBlock Classes="section" Text="Parameters" />
+                <ListBox ItemsSource="{Binding SelectedRecipeParameters}" SelectionChanged="OnRecipeParameterSelectionChanged" Height="120" />
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                  <StackPanel>
+                    <TextBlock Text="name" />
+                    <TextBox Text="{Binding RitualParameterName}" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="label" />
+                    <TextBox Text="{Binding RitualParameterLabel}" />
+                  </StackPanel>
+                </Grid>
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                  <StackPanel>
+                    <TextBlock Text="default" />
+                    <TextBox Text="{Binding RitualParameterDefaultValue}" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="kind" />
+                    <TextBox Text="{Binding RitualParameterKind}" />
+                  </StackPanel>
+                </Grid>
+                <CheckBox Content="required" IsChecked="{Binding RitualParameterRequired}" />
+                <WrapPanel ItemSpacing="8">
+                  <Button Classes="primary" Content="add / update parameter" Click="OnAddOrUpdateRecipeParameterClick" />
+                  <Button Classes="secondary" Content="remove parameter" Click="OnRemoveRecipeParameterClick" />
+                </WrapPanel>
+
+                <TextBlock Classes="section" Text="Learning + Teach Mode" />
+                <WrapPanel ItemSpacing="8">
+                  <Button Classes="secondary" Content="promote from history" Click="OnPromoteHistoryClick" />
+                  <Button Classes="secondary" Content="promote from watch" Click="OnPromoteWatchClick" />
+                  <Button Classes="secondary" Content="start teach" Click="OnStartTeachModeClick" />
+                  <Button Classes="secondary" Content="stop teach" Click="OnStopTeachModeClick" />
+                </WrapPanel>
+                <TextBlock Text="{Binding TeachModeStatus}" Foreground="#9CB3D1" TextWrapping="Wrap" />
+                <TextBlock Classes="section" Text="Ritual Suggestion" />
+                <TextBox Text="{Binding RitualSuggestionPreview}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="120" />
+                <TextBlock Classes="section" Text="Run Log" />
+                <TextBlock Text="{Binding SelectedRitualRunStatus}" Foreground="#9CB3D1" />
+                <TextBox Text="{Binding SelectedRitualRunLog}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="180" />
+              </StackPanel>
+            </ScrollViewer>
+          </Border>
+        </Grid>
+      </TabItem>
+
+      <TabItem Header="History">
+        <Grid Margin="0,16,0,0" ColumnDefinitions="420,*" ColumnSpacing="16">
+          <Border Classes="card" Grid.Column="0">
+            <Grid RowDefinitions="Auto,Auto,*" RowSpacing="12">
+              <TextBlock Classes="section" Text="Action History" />
+              <StackPanel Grid.Row="1" Spacing="8">
+                <TextBox PlaceholderText="search actions, apps or prompts" Text="{Binding HistorySearch}" />
+                <WrapPanel ItemSpacing="8">
+                  <Button Classes="primary" Content="filter history" Click="OnHistoryFilterClick" HorizontalAlignment="Left" />
+                  <TextBlock Text="promote count" VerticalAlignment="Center" />
+                  <TextBox Width="90" Text="{Binding SelectedHistoryPromotionCountText}" />
+                  <Button Classes="secondary" Content="create ritual from selection" Click="OnPromoteHistoryClick" />
+                </WrapPanel>
+              </StackPanel>
+              <ListBox Grid.Row="2"
+                       ItemsSource="{Binding ActionHistory}"
+                       SelectionChanged="OnHistorySelectionChanged" />
+            </Grid>
+          </Border>
+
+          <Border Classes="card" Grid.Column="1">
+            <StackPanel Spacing="12">
+              <TextBlock Classes="section" Text="History Detail" />
+              <TextBox Text="{Binding SelectedHistoryDetail}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="640" />
+            </StackPanel>
+          </Border>
+        </Grid>
+      </TabItem>
+
+      <TabItem Header="Diagnostics">
+        <Grid Margin="0,16,0,0" ColumnDefinitions="420,*" ColumnSpacing="16">
+          <Border Classes="card" Grid.Column="0">
+            <Grid RowDefinitions="Auto,Auto,*" RowSpacing="12">
+              <TextBlock Classes="section" Text="Diagnostics Center" />
+              <StackPanel Grid.Row="1" Spacing="8">
+                <TextBox PlaceholderText="filter diagnostics" Text="{Binding DiagnosticsSearch}" />
+                <WrapPanel ItemSpacing="8">
+                  <Button Classes="primary" Content="filter" Click="OnDiagnosticsFilterClick" />
+                  <Button Classes="secondary" Content="export" Click="OnExportDiagnosticsClick" />
+                  <Button Classes="secondary" Content="clear logs" Click="OnClearDiagnosticsClick" />
+                </WrapPanel>
+              </StackPanel>
+              <ListBox Grid.Row="2"
+                       ItemsSource="{Binding Diagnostics}"
+                       SelectionChanged="OnDiagnosticsSelectionChanged" />
+            </Grid>
+          </Border>
+
+          <Border Classes="card" Grid.Column="1">
+            <StackPanel Spacing="12">
+              <TextBlock Classes="section" Text="Diagnostic Detail" />
+              <TextBox Text="{Binding SelectedDiagnosticDetail}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="640" />
+            </StackPanel>
+          </Border>
+        </Grid>
+      </TabItem>
+
+      <TabItem Header="Console">
+        <Grid Margin="0,16,0,0" ColumnDefinitions="460,*" ColumnSpacing="16">
+          <Border Classes="card" Grid.Column="0">
+            <StackPanel Spacing="12">
+              <TextBlock Classes="section" Text="Local Agent Console" />
+              <TextBlock Text="agent" />
+              <ComboBox ItemsSource="{Binding AgentOptions}" SelectedItem="{Binding SelectedAgent}" />
+              <TextBlock Text="prompt" />
+              <TextBox Text="{Binding ConsolePrompt}" AcceptsReturn="True" TextWrapping="Wrap" Height="420" />
+              <WrapPanel ItemSpacing="8">
+                <Button Classes="primary" Content="run selected agent" Click="OnRunSelectedAgentClick" />
+                <TextBlock Text="{Binding ConsoleOutputPath}" VerticalAlignment="Center" Foreground="#9CB3D1" TextWrapping="Wrap" Width="220" />
+              </WrapPanel>
+            </StackPanel>
+          </Border>
+
+          <Border Classes="card" Grid.Column="1">
+            <StackPanel Spacing="12">
+              <TextBlock Classes="section" Text="Run Output" />
+              <TextBox Text="{Binding ConsoleOutput}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="640" />
+            </StackPanel>
+          </Border>
+        </Grid>
+      </TabItem>
+
+      <TabItem Header="Live Context">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+          <Grid Margin="0,16,0,0" ColumnDefinitions="460,*" ColumnSpacing="16">
+            <Border Classes="card" Grid.Column="0">
+              <StackPanel Spacing="12">
+                <TextBlock Classes="section" Text="Active Window" />
+                <Button Classes="primary" Content="refresh active window" Click="OnRefreshActiveWindowClick" HorizontalAlignment="Left" />
+                <TextBox Text="{Binding ActiveAppSummary}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="300" />
+                <TextBlock Classes="section" Text="AX Context" />
+                <TextBox Text="{Binding AxContextSummary}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="260" />
+                <TextBlock Text="{Binding AxSuggestedActions}" Foreground="#9CB3D1" TextWrapping="Wrap" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card" Grid.Column="1">
+              <StackPanel Spacing="12">
+                <TextBlock Classes="section" Text="Desktop Inspector" />
+                <WrapPanel ItemSpacing="8">
+                  <Button Classes="primary" Content="list controls" Click="OnInspectorListControlsClick" />
+                  <Button Classes="secondary" Content="read form" Click="OnInspectorReadFormClick" />
+                  <Button Classes="secondary" Content="read table" Click="OnInspectorReadTableClick" />
+                  <Button Classes="secondary" Content="read dialog" Click="OnInspectorReadDialogClick" />
+                  <Button Classes="secondary" Content="selected row" Click="OnInspectorReadSelectedRowClick" />
+                  <Button Classes="secondary" Content="focus window" Click="OnInspectorFocusWindowClick" />
+                </WrapPanel>
+                <TextBlock Classes="section" Text="AX Inspector" />
+                <WrapPanel ItemSpacing="8">
+                  <Button Classes="primary" Content="ax read context" Click="OnAxReadContextClick" />
+                  <Button Classes="secondary" Content="ax read form" Click="OnAxReadFormClick" />
+                  <Button Classes="primary" Content="ax read grid" Click="OnAxReadGridClick" />
+                  <Button Classes="secondary" Content="ax selected row" Click="OnAxReadSelectedRowClick" />
+                  <Button Classes="secondary" Content="ax confirm dialog" Click="OnAxConfirmDialogClick" />
+                  <Button Classes="secondary" Content="ax cancel dialog" Click="OnAxCancelDialogClick" />
+                </WrapPanel>
+                <TextBlock Text="custom action" />
+                <WrapPanel ItemSpacing="8">
+                  <TextBox Width="360" Text="{Binding InspectorAction}" />
+                  <Button Classes="secondary" Content="run action" Click="OnInspectorRunCustomClick" />
+                </WrapPanel>
+                <TextBox Text="{Binding InspectorResult}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="460" />
+              </StackPanel>
+            </Border>
+          </Grid>
+        </ScrollViewer>
+      </TabItem>
+    </TabControl>
+  </Grid>
+</Window>

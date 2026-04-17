@@ -1,0 +1,140 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:fluent="clr-namespace:Avalonia.Themes.Fluent;assembly=Avalonia.Themes.Fluent"
+             x:Class="ClippyRWAvalonia.App"
+             RequestedThemeVariant="Dark">
+  <Application.Styles>
+    <fluent:FluentTheme />
+    <Style Selector="Window">
+      <Setter Property="Background" Value="#08111A" />
+      <Setter Property="Foreground" Value="#F6F9FD" />
+    </Style>
+    <Style Selector="TextBlock.kicker">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Foreground" Value="#7FD6E4" />
+      <Setter Property="LetterSpacing" Value="1.4" />
+      <Setter Property="TextTransform" Value="Uppercase" />
+    </Style>
+    <Style Selector="TextBlock.section">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Foreground" Value="#8FD1FF" />
+      <Setter Property="LetterSpacing" Value="0.8" />
+      <Setter Property="TextTransform" Value="Uppercase" />
+    </Style>
+    <Style Selector="TextBlock.muted">
+      <Setter Property="Foreground" Value="#8EA6C6" />
+    </Style>
+    <Style Selector="TextBlock.metricValue">
+      <Setter Property="FontSize" Value="22" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#F7FBFF" />
+    </Style>
+    <Style Selector="TextBlock.metricLabel">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="#8EA6C6" />
+      <Setter Property="TextTransform" Value="Uppercase" />
+      <Setter Property="LetterSpacing" Value="1.1" />
+    </Style>
+    <Style Selector="Border.card">
+      <Setter Property="CornerRadius" Value="24" />
+      <Setter Property="Padding" Value="20" />
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+          <GradientStop Color="#131E2B" Offset="0" />
+          <GradientStop Color="#0E1724" Offset="0.62" />
+          <GradientStop Color="#0B1420" Offset="1" />
+        </LinearGradientBrush>
+      </Setter>
+      <Setter Property="BorderBrush" Value="#24364F" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BoxShadow">
+        <BoxShadows>
+          <BoxShadow Blur="28" OffsetY="14" Color="#26000000" />
+        </BoxShadows>
+      </Setter>
+    </Style>
+    <Style Selector="Border.heroCard">
+      <Setter Property="CornerRadius" Value="28" />
+      <Setter Property="Padding" Value="24" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BorderBrush" Value="#2A4C67" />
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+          <GradientStop Color="#102133" Offset="0" />
+          <GradientStop Color="#0C1724" Offset="0.48" />
+          <GradientStop Color="#0A111C" Offset="1" />
+        </LinearGradientBrush>
+      </Setter>
+      <Setter Property="BoxShadow">
+        <BoxShadows>
+          <BoxShadow Blur="34" OffsetY="18" Color="#33000000" />
+        </BoxShadows>
+      </Setter>
+    </Style>
+    <Style Selector="Border.metric">
+      <Setter Property="CornerRadius" Value="20" />
+      <Setter Property="Padding" Value="16" />
+      <Setter Property="Background" Value="#101927" />
+      <Setter Property="BorderBrush" Value="#21324A" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="#7BE6C8" />
+      <Setter Property="Foreground" Value="#081511" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Padding" Value="16,10" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="MinHeight" Value="40" />
+    </Style>
+    <Style Selector="Button.secondary">
+      <Setter Property="Background" Value="#142132" />
+      <Setter Property="Foreground" Value="#F5F7FA" />
+      <Setter Property="Padding" Value="14,10" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="MinHeight" Value="40" />
+      <Setter Property="BorderBrush" Value="#2A415C" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="TextBox, ComboBox, ListBox">
+      <Setter Property="Background" Value="#0C1522" />
+      <Setter Property="BorderBrush" Value="#22344C" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="14" />
+    </Style>
+    <Style Selector="TextBox">
+      <Setter Property="Padding" Value="12,10" />
+      <Setter Property="Foreground" Value="#F6F9FD" />
+      <Setter Property="SelectionBrush" Value="#335DD7C2" />
+      <Setter Property="WatermarkForeground" Value="#6782A4" />
+    </Style>
+    <Style Selector="ComboBox">
+      <Setter Property="Padding" Value="10,8" />
+    </Style>
+    <Style Selector="ListBox">
+      <Setter Property="Padding" Value="6" />
+    </Style>
+    <Style Selector="TabControl">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="TabItem">
+      <Setter Property="Padding" Value="14,8" />
+      <Setter Property="Margin" Value="0,0,8,0" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Background" Value="#101A28" />
+      <Setter Property="Foreground" Value="#B9CBE4" />
+    </Style>
+    <Style Selector="TabItem:selected">
+      <Setter Property="Background" Value="#183149" />
+      <Setter Property="Foreground" Value="#F7FBFF" />
+    </Style>
+    <Style Selector="Border.badge">
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="Padding" Value="12,6" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BorderBrush" Value="#315577" />
+      <Setter Property="Background" Value="#132334" />
+    </Style>
+  </Application.Styles>
+</Application>

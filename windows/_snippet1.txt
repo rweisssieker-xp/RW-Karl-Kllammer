@@ -1,0 +1,520 @@
+
+            _contextPanel = CreateCardPanel(560, 90, 378, 468, Color.FromArgb(14, 24, 34));
+            _contextPanel.Anchor = AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
+            Controls.Add(_contextPanel);
+            _contextPanel.SendToBack();
+
+            _workspacePanel = CreateCardPanel(18, 548, 920, 308, Color.FromArgb(15, 22, 33));
+            _workspacePanel.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+            Controls.Add(_workspacePanel);
+            _workspacePanel.SendToBack();
+
+            _controlEnvPanel = CreateCardPanel(30, 130, 500, 92, Color.FromArgb(13, 20, 31));
+            Controls.Add(_controlEnvPanel);
+            _controlEnvPanel.SendToBack();
+            _controlModePanel = CreateCardPanel(30, 228, 500, 120, Color.FromArgb(13, 20, 31));
+            Controls.Add(_controlModePanel);
+            _controlModePanel.SendToBack();
+            _controlActionPanel = CreateCardPanel(30, 354, 500, 104, Color.FromArgb(13, 20, 31));
+            Controls.Add(_controlActionPanel);
+            _controlActionPanel.SendToBack();
+
+            _contextModelPanel = CreateCardPanel(574, 126, 338, 94, Color.FromArgb(16, 26, 39));
+            Controls.Add(_contextModelPanel);
+            _contextModelPanel.SendToBack();
+            _contextRitualPanel = CreateCardPanel(574, 226, 338, 128, Color.FromArgb(16, 26, 39));
+            Controls.Add(_contextRitualPanel);
+            _contextRitualPanel.SendToBack();
+            _contextKnowledgePanel = CreateCardPanel(574, 360, 338, 184, Color.FromArgb(16, 26, 39));
+            Controls.Add(_contextKnowledgePanel);
+            _contextKnowledgePanel.SendToBack();
+            _contextInsightPanel = CreateCardPanel(574, 550, 338, 152, Color.FromArgb(16, 26, 39));
+            Controls.Add(_contextInsightPanel);
+            _contextInsightPanel.SendToBack();
+
+            _controlSectionLabel = CreateSectionLabel("control deck", 34, 100, 180);
+            Controls.Add(_controlSectionLabel);
+            _contextSectionLabel = CreateSectionLabel("context + memory", 576, 100, 180);
+            Controls.Add(_contextSectionLabel);
+            _conversationSectionLabel = CreateSectionLabel("conversation", 34, 558, 180);
+            Controls.Add(_conversationSectionLabel);
+            _controlEnvSectionLabel = CreateSectionLabel("environment", 42, 136, 160);
+            Controls.Add(_controlEnvSectionLabel);
+            _controlModeSectionLabel = CreateSectionLabel("voice + mode", 42, 234, 160);
+            Controls.Add(_controlModeSectionLabel);
+            _controlActionSectionLabel = CreateSectionLabel("system actions", 42, 360, 160);
+            Controls.Add(_controlActionSectionLabel);
+            _contextModelSectionLabel = CreateSectionLabel("model routing", 586, 132, 160);
+            Controls.Add(_contextModelSectionLabel);
+            _contextRitualSectionLabel = CreateSectionLabel("ritual engine", 586, 232, 160);
+            Controls.Add(_contextRitualSectionLabel);
+            _contextKnowledgeSectionLabel = CreateSectionLabel("knowledge manager", 586, 366, 180);
+            Controls.Add(_contextKnowledgeSectionLabel);
+            _contextInsightSectionLabel = CreateSectionLabel("live context", 586, 556, 160);
+            Controls.Add(_contextInsightSectionLabel);
+
+            _screenAwareChip = CreateChip("screen-aware", 620, 24, 92, Color.FromArgb(34, 83, 129), Color.FromArgb(182, 223, 255));
+            Controls.Add(_screenAwareChip);
+            _ritualMemoryChip = CreateChip("ritual memory", 718, 24, 96, Color.FromArgb(39, 88, 68), Color.FromArgb(188, 239, 214));
+            Controls.Add(_ritualMemoryChip);
+            _safeActionsChip = CreateChip("safe actions", 820, 24, 92, Color.FromArgb(112, 74, 28), Color.FromArgb(255, 223, 171));
+            Controls.Add(_safeActionsChip);
+            _modeBadgeLabel = CreateChip("mode: " + _settings.CompanionMode, 344, 24, 112, Color.FromArgb(36, 56, 94), Color.FromArgb(210, 225, 255));
+            Controls.Add(_modeBadgeLabel);
+            _statusBadgeLabel = CreateChip("status: ready", 462, 24, 112, Color.FromArgb(31, 88, 58), Color.FromArgb(211, 255, 225));
+            Controls.Add(_statusBadgeLabel);
+            _riskBadgeLabel = CreateChip("risk: low", 580, 24, 80, Color.FromArgb(53, 73, 34), Color.FromArgb(219, 244, 173));
+            Controls.Add(_riskBadgeLabel);
+
+            _contextInfoPanel1 = CreateCardPanel(574, 214, 338, 44, Color.FromArgb(18, 31, 46));
+            _contextInfoPanel1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Controls.Add(_contextInfoPanel1);
+            _contextInfoPanel1.SendToBack();
+            _contextInfoPanel2 = CreateCardPanel(574, 262, 338, 44, Color.FromArgb(18, 31, 46));
+            _contextInfoPanel2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Controls.Add(_contextInfoPanel2);
+            _contextInfoPanel2.SendToBack();
+            _contextInfoPanel3 = CreateCardPanel(574, 310, 338, 44, Color.FromArgb(18, 31, 46));
+            _contextInfoPanel3.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Controls.Add(_contextInfoPanel3);
+            _contextInfoPanel3.SendToBack();
+            _contextInfoPanel4 = CreateCardPanel(574, 358, 338, 44, Color.FromArgb(25, 37, 28));
+            _contextInfoPanel4.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Controls.Add(_contextInfoPanel4);
+            _contextInfoPanel4.SendToBack();
+            _activityPanel = CreateCardPanel(598, 712, 318, 96, Color.FromArgb(18, 30, 44));
+            _activityPanel.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
+            Controls.Add(_activityPanel);
+            _activityPanel.SendToBack();
+
+            _titleLabel = CreateLabel("Karl Klammer for Windows", 24, 20, 320, 28, new Font("Segoe UI Semibold", 16.0f), Color.White);
+            Controls.Add(_titleLabel);
+            _subtitleLabel = CreateLabel("screen-aware companion + multi-llm + local agents + ritual automation", 26, 50, 720, 24, null, Color.FromArgb(160, 174, 192));
+            Controls.Add(_subtitleLabel);
+            _envFileLabel = CreateLabel(".env file", 26, 96, 120, 24);
+            Controls.Add(_envFileLabel);
+
+            _envPathTextBox = CreateTextBox(26, 122, 520, 28, EnvironmentConfiguration.EnvFilePath);
+            _envPathTextBox.ReadOnly = true;
+            _envPathTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            Controls.Add(_envPathTextBox);
+
+            _envStatusLabel = CreateLabel("", 26, 154, 520, 24, null, Color.FromArgb(235, 210, 120));
+            _envStatusLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            Controls.Add(_envStatusLabel);
+
+            _activeAppLabel = CreateLabel("active app: detecting...", 588, 284, 310, 24, new Font("Segoe UI Semibold", 9.5f), Color.White);
+            _activeAppLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Controls.Add(_activeAppLabel);
+
+            _appActionsLabel = CreateLabel("app actions: detecting...", 588, 332, 310, 24, null, Color.FromArgb(160, 174, 192));
+            _appActionsLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Controls.Add(_appActionsLabel);
+
+            _knowledgeStatusLabel = CreateLabel("knowledge: checking...", 588, 380, 310, 24, null, Color.FromArgb(160, 174, 192));
+            _knowledgeStatusLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Controls.Add(_knowledgeStatusLabel);
+
+            _proactiveSuggestionLabel = CreateLabel("next idea: watching your context...", 588, 428, 310, 40, new Font("Segoe UI Semibold", 9.0f), Color.FromArgb(198, 255, 210));
+            _proactiveSuggestionLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Controls.Add(_proactiveSuggestionLabel);
+
+            _providerHealthLabel = CreateLabel("provider: checking...", 40, 792, 240, 20, new Font("Segoe UI", 8.75f), Color.FromArgb(173, 191, 214));
+            Controls.Add(_providerHealthLabel);
+            _voiceStatusLabel = CreateLabel("voice: checking...", 40, 814, 240, 20, new Font("Segoe UI", 8.75f), Color.FromArgb(173, 191, 214));
+            Controls.Add(_voiceStatusLabel);
+            _activeWindowDetailsLabel = CreateLabel("window details: pending", 40, 836, 520, 36, new Font("Segoe UI", 8.5f), Color.FromArgb(132, 157, 190));
+            Controls.Add(_activeWindowDetailsLabel);
+            _recipeManagerLabel = CreateLabel("ritual manager", 0, 0, 140, 20, new Font("Segoe UI Semibold", 9.5f), Color.White);
+            Controls.Add(_recipeManagerLabel);
+            _actionInspectorLabel = CreateLabel("action inspector", 0, 0, 140, 20, new Font("Segoe UI Semibold", 9.5f), Color.White);
+            Controls.Add(_actionInspectorLabel);
+            _diagnosticsLabel = CreateLabel("diagnostics", 0, 0, 120, 20, new Font("Segoe UI Semibold", 9.5f), Color.White);
+            Controls.Add(_diagnosticsLabel);
+
+            _knowledgeDocsLabel = CreateLabel("knowledge docs", 588, 140, 150, 22, new Font("Segoe UI Semibold", 10.0f), Color.White);
+            Controls.Add(_knowledgeDocsLabel);
+
+            _knowledgeSearchTextBox = CreateTextBox(588, 164, 310, 28, string.Empty);
+            _knowledgeSearchTextBox.PlaceholderText = "search docs, chunks, filenames";
+            _knowledgeSearchTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _knowledgeSearchTextBox.TextChanged += delegate { RefreshKnowledgeManager(); };
+            Controls.Add(_knowledgeSearchTextBox);
+
+            _knowledgeListBox = new ListBox();
+            _knowledgeListBox.Location = new Point(588, 198);
+            _knowledgeListBox.Size = new Size(310, 78);
+            _knowledgeListBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _knowledgeListBox.Font = new Font("Segoe UI", 9.0f);
+            _knowledgeListBox.BackColor = Color.FromArgb(19, 29, 43);
+            _knowledgeListBox.ForeColor = Color.White;
+            _knowledgeListBox.BorderStyle = BorderStyle.FixedSingle;
+            _knowledgeListBox.SelectedIndexChanged += delegate { UpdateKnowledgePreview(); };
+            Controls.Add(_knowledgeListBox);
+
+            _importKnowledgeButton = CreateButton("import docs", 588, 246, 92, 28, Color.FromArgb(22, 30, 45), Color.White);
+            _importKnowledgeButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _importKnowledgeButton.Click += delegate { ImportKnowledgeDocuments(); };
+            Controls.Add(_importKnowledgeButton);
+
+            _refreshKnowledgeButton = CreateButton("refresh", 686, 246, 74, 28, Color.FromArgb(22, 30, 45), Color.White);
+            _refreshKnowledgeButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _refreshKnowledgeButton.Click += delegate { RefreshKnowledgeManager(); };
+            Controls.Add(_refreshKnowledgeButton);
+
+            _reindexSelectedKnowledgeButton = CreateButton("reindex", 766, 246, 74, 28, Color.FromArgb(22, 30, 45), Color.White);
+            _reindexSelectedKnowledgeButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _reindexSelectedKnowledgeButton.Click += delegate { ReindexSelectedKnowledgeDocument(); };
+            Controls.Add(_reindexSelectedKnowledgeButton);
+
+            _removeKnowledgeButton = CreateButton("remove", 846, 246, 74, 28, Color.FromArgb(89, 40, 40), Color.White);
+            _removeKnowledgeButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _removeKnowledgeButton.Click += delegate { RemoveSelectedKnowledgeDocument(); };
+            Controls.Add(_removeKnowledgeButton);
+
+            _previewLabel = CreateLabel("preview", 588, 476, 120, 18, new Font("Segoe UI Semibold", 9.5f), Color.FromArgb(188, 239, 214));
+            Controls.Add(_previewLabel);
+            _knowledgePreviewTextBox = CreateTextBox(588, 498, 310, 40, string.Empty);
+            _knowledgePreviewTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
+            _knowledgePreviewTextBox.Multiline = true;
+            _knowledgePreviewTextBox.ReadOnly = true;
+            _knowledgePreviewTextBox.ScrollBars = ScrollBars.Vertical;
+            Controls.Add(_knowledgePreviewTextBox);
+
+            _recipeManagerListBox = new ListBox();
+            _recipeManagerListBox.Location = new Point(0, 0);
+            _recipeManagerListBox.Size = new Size(180, 100);
+            _recipeManagerListBox.Font = new Font("Segoe UI", 9.0f);
+            _recipeManagerListBox.BackColor = Color.FromArgb(19, 29, 43);
+            _recipeManagerListBox.ForeColor = Color.White;
+            _recipeManagerListBox.BorderStyle = BorderStyle.FixedSingle;
+            _recipeManagerListBox.SelectedIndexChanged += delegate { UpdateRecipeManagerPreview(); };
+            Controls.Add(_recipeManagerListBox);
+
+            _recipePreviewTextBox = CreateTextBox(0, 0, 180, 100, string.Empty);
+            _recipePreviewTextBox.Multiline = true;
+            _recipePreviewTextBox.ReadOnly = true;
+            _recipePreviewTextBox.ScrollBars = ScrollBars.Vertical;
+            Controls.Add(_recipePreviewTextBox);
+
+            _deleteRecipeButton = CreateButton("delete ritual", 0, 0, 100, 28, Color.FromArgb(89, 40, 40), Color.White);
+            _deleteRecipeButton.Click += delegate { DeleteSelectedRecipe(); };
+            Controls.Add(_deleteRecipeButton);
+
+            _actionInspectorTextBox = CreateTextBox(0, 0, 200, 100, string.Empty);
+            _actionInspectorTextBox.Multiline = true;
+            _actionInspectorTextBox.ReadOnly = true;
+            _actionInspectorTextBox.ScrollBars = ScrollBars.Vertical;
+            Controls.Add(_actionInspectorTextBox);
+
+            _diagnosticsListBox = new ListBox();
+            _diagnosticsListBox.Location = new Point(0, 0);
+            _diagnosticsListBox.Size = new Size(180, 100);
+            _diagnosticsListBox.Font = new Font("Consolas", 8.5f);
+            _diagnosticsListBox.BackColor = Color.FromArgb(15, 24, 37);
+            _diagnosticsListBox.ForeColor = Color.FromArgb(255, 214, 173);
+            _diagnosticsListBox.BorderStyle = BorderStyle.FixedSingle;
+            Controls.Add(_diagnosticsListBox);
+
+            _providerLabel = CreateLabel("provider", 570, 96, 80, 24);
+            Controls.Add(_providerLabel);
+
+            _providerComboBox = new ComboBox();
+            _providerComboBox.Location = new Point(570, 122);
+            _providerComboBox.Size = new Size(140, 28);
+            _providerComboBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _providerComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            _providerComboBox.Items.Add("anthropic");
+            _providerComboBox.Items.Add("openai");
+            _providerComboBox.Items.Add("openai-compatible");
+            _providerComboBox.SelectedItem = _providerComboBox.Items.Contains(_settings.AssistantProvider) ? _settings.AssistantProvider : "anthropic";
+            _providerComboBox.SelectedIndexChanged += delegate { ApplyProviderDefaultsIfNeeded(); };
+            Controls.Add(_providerComboBox);
+
+            _modelLabel = CreateLabel("model", 724, 96, 80, 24);
+            Controls.Add(_modelLabel);
+
+            _modelTextBox = CreateTextBox(724, 122, 170, 28, _settings.AssistantModel);
+            _modelTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Controls.Add(_modelTextBox);
+
+            _speakCheckBox = new CheckBox();
+            _speakCheckBox.Text = "speak responses";
+            _speakCheckBox.Location = new Point(26, 188);
+            _speakCheckBox.Size = new Size(150, 26);
+            _speakCheckBox.Checked = _settings.SpeakResponses;
+            _speakCheckBox.ForeColor = Color.White;
+            _speakCheckBox.BackColor = BackColor;
+            Controls.Add(_speakCheckBox);
+
+            _modeLabel = CreateLabel("mode", 192, 162, 80, 24);
+            Controls.Add(_modeLabel);
+
+            _modeComboBox = new ComboBox();
+            _modeComboBox.Location = new Point(192, 188);
+            _modeComboBox.Size = new Size(150, 28);
+            _modeComboBox.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            _modeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            _modeComboBox.Items.Add("companion");
+            _modeComboBox.Items.Add("agent");
+            _modeComboBox.Items.Add("automation");
+            _modeComboBox.Items.Add("watch");
+            _modeComboBox.SelectedItem = _modeComboBox.Items.Contains(_settings.CompanionMode) ? _settings.CompanionMode : "companion";
+            _modeComboBox.SelectedIndexChanged += delegate
+            {
+                UpdateModeBadge();
+                AddActivityItem("mode", _modeComboBox.SelectedItem == null ? "companion" : _modeComboBox.SelectedItem.ToString());
+            };
+            Controls.Add(_modeComboBox);
+
+            _suggestAutomationsCheckBox = new CheckBox();
+            _suggestAutomationsCheckBox.Text = "save automation hints";
+            _suggestAutomationsCheckBox.Location = new Point(360, 188);
+            _suggestAutomationsCheckBox.Size = new Size(180, 26);
+            _suggestAutomationsCheckBox.Checked = _settings.SuggestAutomations;
+            _suggestAutomationsCheckBox.ForeColor = Color.White;
+            _suggestAutomationsCheckBox.BackColor = BackColor;
+            Controls.Add(_suggestAutomationsCheckBox);
+
+            _useKnowledgeCheckBox = new CheckBox();
+            _useKnowledgeCheckBox.Text = "use local knowledge";
+            _useKnowledgeCheckBox.Location = new Point(26, 214);
+            _useKnowledgeCheckBox.Size = new Size(170, 26);
+            _useKnowledgeCheckBox.Checked = _settings.UseLocalKnowledge;
+            _useKnowledgeCheckBox.ForeColor = Color.White;
+            _useKnowledgeCheckBox.BackColor = BackColor;
+            Controls.Add(_useKnowledgeCheckBox);
+
+            _recipeLabel = CreateLabel("recipe", 570, 162, 80, 24);
+            Controls.Add(_recipeLabel);
+
+            _recipeComboBox = new ComboBox();
+            _recipeComboBox.Location = new Point(570, 188);
+            _recipeComboBox.Size = new Size(240, 28);
+            _recipeComboBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _recipeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            Controls.Add(_recipeComboBox);
+
+            _learnedRitualsLabel = CreateLabel("learned rituals", 570, 220, 120, 24);
+            Controls.Add(_learnedRitualsLabel);
+
+            _watchSuggestionComboBox = new ComboBox();
+            _watchSuggestionComboBox.Location = new Point(570, 246);
+            _watchSuggestionComboBox.Size = new Size(240, 28);
+            _watchSuggestionComboBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _watchSuggestionComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            Controls.Add(_watchSuggestionComboBox);
+
+            _statusLabel = CreateLabel("ready", 26, 312, 420, 24, null, Color.FromArgb(93, 212, 136));
+            Controls.Add(_statusLabel);
+
+            _hotkeyLabel = CreateLabel("push to talk hotkey: f8", 26, 336, 360, 24, null, Color.FromArgb(160, 174, 192));
+            Controls.Add(_hotkeyLabel);
+
+            _saveButton = CreateButton("save settings", 26, 366, 110, 34, Color.FromArgb(33, 150, 243), Color.White);
+            _saveButton.Click += delegate
+            {
+                PersistSettings();
+                SetStatus("settings saved", Color.FromArgb(93, 212, 136));
+            };
+            Controls.Add(_saveButton);
+
+            _reloadEnvButton = CreateButton("reload .env", 150, 366, 110, 34, Color.FromArgb(22, 30, 45), Color.White);
+            _reloadEnvButton.Click += delegate
+            {
+                ReloadEnvironmentConfiguration();
+            };
+            Controls.Add(_reloadEnvButton);
+
+            _testApiButton = CreateButton("test apis", 274, 366, 110, 34, Color.FromArgb(22, 30, 45), Color.White);
+            _testApiButton.Click += async delegate { await RunWorkerTestAsync(); };
+            Controls.Add(_testApiButton);
+
+            _clearHistoryButton = CreateButton("clear history", 398, 366, 110, 34, Color.FromArgb(22, 30, 45), Color.White);
+            _clearHistoryButton.Click += delegate
+            {
+                _conversationHistory.Clear();
+                _responseTextBox.Clear();
+                SetStatus("history cleared", Color.FromArgb(93, 212, 136));
+            };
+            Controls.Add(_clearHistoryButton);
+
+            _reindexKnowledgeButton = CreateButton("reindex knowledge", 522, 366, 130, 34, Color.FromArgb(22, 30, 45), Color.White);
+            _reindexKnowledgeButton.Click += delegate
+            {
+                try
+                {
+                    int chunkCount = KnowledgeBaseService.Reindex();
+                    RefreshKnowledgeStatus();
+                    RefreshKnowledgeManager();
+                    SetStatus("knowledge indexed: " + chunkCount + " chunks", Color.FromArgb(93, 212, 136));
+                }
+                catch (Exception exception)
+                {
+                    SetStatus("knowledge indexing failed", Color.FromArgb(235, 120, 120));
+                    MessageBox.Show(exception.Message, "Karl Klammer knowledge indexing", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            };
+            Controls.Add(_reindexKnowledgeButton);
+
+            _saveRecipeButton = CreateButton("save recipe", 666, 366, 110, 34, Color.FromArgb(22, 30, 45), Color.White);
+            _saveRecipeButton.Click += delegate { SaveCurrentPromptAsRecipe(); };
+            Controls.Add(_saveRecipeButton);
+
+            _runRecipeButton = CreateButton("run recipe", 790, 366, 110, 34, Color.FromArgb(22, 30, 45), Color.White);
+            _runRecipeButton.Click += async delegate { await RunSelectedRecipeAsync(); };
+            Controls.Add(_runRecipeButton);
+
+            _useContextIdeaButton = CreateButton("use context idea", 26, 402, 150, 34, Color.FromArgb(22, 30, 45), Color.White);
+            _useContextIdeaButton.Click += delegate { ApplyProactiveSuggestionToPrompt(); };
+            Controls.Add(_useContextIdeaButton);
+
+            _runContextIdeaButton = CreateButton("run context idea", 190, 402, 150, 34, Color.FromArgb(22, 30, 45), Color.White);
+            _runContextIdeaButton.Click += async delegate { await RunProactiveSuggestionAsync(); };
+            Controls.Add(_runContextIdeaButton);
+
+            _openRitualManagerButton = CreateButton("ritual manager", 0, 0, 110, 30, Color.FromArgb(22, 30, 45), Color.White);
+            _openRitualManagerButton.Click += delegate { ShowRitualManagerDialog(); };
+            Controls.Add(_openRitualManagerButton);
+
+            _openHistoryViewerButton = CreateButton("action history", 0, 0, 110, 30, Color.FromArgb(22, 30, 45), Color.White);
+            _openHistoryViewerButton.Click += delegate { ShowActionHistoryDialog(); };
+            Controls.Add(_openHistoryViewerButton);
+
+            _openControlInspectorButton = CreateButton("window inspector", 0, 0, 110, 30, Color.FromArgb(22, 30, 45), Color.White);
+            _openControlInspectorButton.Click += delegate { ShowControlInspectorDialog(); };
+            Controls.Add(_openControlInspectorButton);
+
+            _openProviderVoiceButton = CreateButton("provider + voice", 0, 0, 110, 30, Color.FromArgb(22, 30, 45), Color.White);
+            _openProviderVoiceButton.Click += delegate { ShowProviderVoiceDialog(); };
+            Controls.Add(_openProviderVoiceButton);
+
+            _openDiagnosticsButton = CreateButton("diagnostics", 0, 0, 110, 30, Color.FromArgb(22, 30, 45), Color.White);
+            _openDiagnosticsButton.Click += delegate { ShowDiagnosticsDialog(); };
+            Controls.Add(_openDiagnosticsButton);
+
+            _saveWatchIdeaButton = CreateButton("save ritual", 570, 280, 160, 34, Color.FromArgb(22, 30, 45), Color.White);
+            _saveWatchIdeaButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _saveWatchIdeaButton.Click += delegate { SaveSelectedWatchSuggestionAsRecipe(); };
+            Controls.Add(_saveWatchIdeaButton);
+
+            _useWatchIdeaButton = CreateButton("use ritual", 744, 280, 110, 34, Color.FromArgb(22, 30, 45), Color.White);
+            _useWatchIdeaButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _useWatchIdeaButton.Click += delegate { UseSelectedWatchSuggestion(); };
+            Controls.Add(_useWatchIdeaButton);
+
+            _replayRitualButton = CreateButton("replay", 860, 280, 66, 34, Color.FromArgb(22, 30, 45), Color.White);
+            _replayRitualButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _replayRitualButton.Click += async delegate { await ReplaySelectedWatchSuggestionAsync(); };
+            Controls.Add(_replayRitualButton);
+
+            _promptLabel = CreateLabel("what do you need help with?", 40, 566, 260, 24, new Font("Segoe UI Semibold", 10.5f), Color.White);
+            Controls.Add(_promptLabel);
+
+            _promptTextBox = CreateTextBox(40, 596, 876, 104, string.Empty);
+            _promptTextBox.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+            _promptTextBox.Multiline = true;
+            _promptTextBox.AcceptsReturn = true;
+            _promptTextBox.ScrollBars = ScrollBars.Vertical;
+            Controls.Add(_promptTextBox);
+
+            _askButton = CreateButton("ask about my screen", 40, 712, 200, 42, Color.FromArgb(93, 212, 136), Color.Black);
+            _askButton.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
+            _askButton.Click += async delegate { await RunAskFlowAsync(); };
+            Controls.Add(_askButton);
+
+            _dictationButton = CreateButton("hold to talk", 254, 712, 160, 42, Color.FromArgb(22, 30, 45), Color.White);
+            _dictationButton.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
+            _dictationButton.MouseDown += delegate(object sender, MouseEventArgs e)
+            {
+                if (e.Button == MouseButtons.Left)
+                {
+                    HandleSpeechPress();
+                }
+            };
+            _dictationButton.MouseUp += async delegate(object sender, MouseEventArgs e)
+            {
+                if (e.Button == MouseButtons.Left)
+                {
+                    await HandleSpeechReleaseAsync();
+                }
+            };
+            Controls.Add(_dictationButton);
+            UpdateSpeechButtonState();
+
+            _copyResponseButton = CreateButton("copy response", 428, 712, 150, 42, Color.FromArgb(22, 30, 45), Color.White);
+            _copyResponseButton.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
+            _copyResponseButton.Click += delegate
+            {
+                if (!string.IsNullOrWhiteSpace(_responseTextBox.Text))
+                {
+                    Clipboard.SetText(_responseTextBox.Text);
+                    SetStatus("response copied", Color.FromArgb(93, 212, 136));
+                }
+            };
+            Controls.Add(_copyResponseButton);
+
+            _activityRailLabel = CreateLabel("activity rail", 614, 720, 140, 20, new Font("Segoe UI Semibold", 9.5f), Color.White);
+            Controls.Add(_activityRailLabel);
+            _activityListBox = new ListBox();
+            _activityListBox.Location = new Point(614, 744);
+            _activityListBox.Size = new Size(286, 52);
+            _activityListBox.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
+            _activityListBox.Font = new Font("Consolas", 8.5f);
+            _activityListBox.BackColor = Color.FromArgb(15, 24, 37);
+            _activityListBox.ForeColor = Color.FromArgb(188, 239, 214);
+            _activityListBox.BorderStyle = BorderStyle.None;
+            _activityListBox.IntegralHeight = false;
+            Controls.Add(_activityListBox);
+
+            _responseLabel = CreateLabel("response", 40, 790, 160, 24, new Font("Segoe UI Semibold", 10.5f), Color.White);
+            Controls.Add(_responseLabel);
+
+            _responseTextBox = CreateTextBox(40, 818, 876, 38, string.Empty);
+            _responseTextBox.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+            _responseTextBox.Multiline = true;
+            _responseTextBox.ReadOnly = true;
+            _responseTextBox.ScrollBars = ScrollBars.Vertical;
+            Controls.Add(_responseTextBox);
+
+            _retrievalSourcesLabel = CreateLabel("sources: none yet", 40, 760, 876, 24, new Font("Segoe UI", 8.5f), Color.FromArgb(116, 151, 188));
+            _retrievalSourcesLabel.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+            Controls.Add(_retrievalSourcesLabel);
+
+            _notifyIcon = new NotifyIcon();
+            _notifyIcon.Icon = SystemIcons.Information;
+            _notifyIcon.Text = "Karl Klammer for Windows";
+            _notifyIcon.Visible = true;
+            _notifyIcon.DoubleClick += delegate { ShowClickyWindow(); };
+
+            _trayMenu = new ContextMenuStrip();
+            ToolStripItem openMenuItem = _trayMenu.Items.Add("Open Karl Klammer");
+            ToolStripItem askMenuItem = _trayMenu.Items.Add("Ask About Screen");
+            ToolStripItem runRecipeMenuItem = _trayMenu.Items.Add("Run Selected Recipe");
+            ToolStripItem testMenuItem = _trayMenu.Items.Add("Test APIs");
+            _trayMenu.Items.Add("-");
+            ToolStripItem quitMenuItem = _trayMenu.Items.Add("Quit");
+
+            openMenuItem.Click += delegate { ShowClickyWindow(); };
+            askMenuItem.Click += async delegate
+            {
+                ShowClickyWindow();
+                await RunAskFlowAsync();
+            };
+            runRecipeMenuItem.Click += async delegate
+            {
+                ShowClickyWindow();
+                await RunSelectedRecipeAsync();
+            };
+            testMenuItem.Click += async delegate { await RunWorkerTestAsync(); };
+            quitMenuItem.Click += delegate
+            {
+                _quitRequested = true;
+                Close();
+            };
+            _notifyIcon.ContextMenuStrip = _trayMenu;
+
+            FormClosing += OnMainFormClosing;
+            Resize += delegate { ApplyAdaptiveLayout(); };
+            Shown += delegate
+            {
