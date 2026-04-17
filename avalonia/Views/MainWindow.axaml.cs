@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using ClippyRWAvalonia.Models;
@@ -14,6 +15,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         Opened += (_, _) => UpdateLayoutMode(Bounds.Width);
         SizeChanged += (_, e) => UpdateLayoutMode(e.NewSize.Width);
+        KeyDown += OnMainWindowKeyDown;
     }
 
     private MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext!;
@@ -54,6 +56,7 @@ public partial class MainWindow : Window
     private void OnHistoryFilterClick(object? sender, RoutedEventArgs e) => ViewModel.FilterHistory();
     private void OnDiagnosticsFilterClick(object? sender, RoutedEventArgs e) => ViewModel.FilterDiagnostics();
     private void OnExportDiagnosticsClick(object? sender, RoutedEventArgs e) => ViewModel.ExportDiagnostics();
+    private void OnExportSupportBundleClick(object? sender, RoutedEventArgs e) => ViewModel.ExportSupportBundle();
     private void OnClearDiagnosticsClick(object? sender, RoutedEventArgs e) => ViewModel.ClearDiagnostics();
     private void OnRefreshActiveWindowClick(object? sender, RoutedEventArgs e) => ViewModel.RefreshActiveWindow();
     private async void OnRunSelectedAgentClick(object? sender, RoutedEventArgs e) => await ViewModel.RunSelectedAgentAsync();
@@ -184,6 +187,54 @@ public partial class MainWindow : Window
         if (sender is ListBox listBox)
         {
             ViewModel.SetSelectedRecipeParameter(listBox.SelectedItem as RitualParameter);
+        }
+    }
+
+    private void OnOpenLiveContextTabClick(object? sender, RoutedEventArgs e) => ViewModel.NavigateToLiveContext();
+
+    private void OnDashboardNavigateSetupClick(object? sender, RoutedEventArgs e) => ViewModel.NavigateToSetup();
+
+    private void OnDashboardNavigateKnowledgeClick(object? sender, RoutedEventArgs e) => ViewModel.NavigateToKnowledge();
+
+    private void OnDashboardNavigateLiveContextClick(object? sender, RoutedEventArgs e) => ViewModel.NavigateToLiveContext();
+
+    private void OnDashboardNavigateRitualsClick(object? sender, RoutedEventArgs e) => ViewModel.NavigateToRituals(true);
+
+    private void OnDashboardNavigateHistoryClick(object? sender, RoutedEventArgs e) => ViewModel.NavigateToHistory();
+
+    private void OnOnboardingEnvClick(object? sender, RoutedEventArgs e) => ViewModel.OnboardingCheckEnvironment();
+
+    private void OnOnboardingKnowledgeClick(object? sender, RoutedEventArgs e) => ViewModel.OnboardingOpenKnowledgeFolder();
+
+    private void OnOnboardingPttClick(object? sender, RoutedEventArgs e) => ViewModel.OnboardingTryPushToTalk();
+
+    private void OnOnboardingAskSmokeClick(object? sender, RoutedEventArgs e) => ViewModel.OnboardingOpenAskSmoke();
+
+    private async void OnMainWindowKeyDown(object? sender, Avalonia.Input.KeyEventArgs e)
+    {
+        if (!e.KeyModifiers.HasFlag(KeyModifiers.Control))
+        {
+            return;
+        }
+
+        if (e.Key == Key.L)
+        {
+            ViewModel.NavigateToLiveContext();
+            e.Handled = true;
+            return;
+        }
+
+        if (e.Key == Key.K)
+        {
+            ViewModel.NavigateToKnowledge();
+            e.Handled = true;
+            return;
+        }
+
+        if (e.Key == Key.Enter)
+        {
+            await ViewModel.RunAssistantAsync();
+            e.Handled = true;
         }
     }
 }

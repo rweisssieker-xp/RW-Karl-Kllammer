@@ -6,7 +6,7 @@ Aligned with root [`README.md`](../README.md) (*Known Limitations*, *Local-First
 
 **Goal:** A repeatable way to install or update Carolus Nexus on Windows without cloning the repo.
 
-- Define release artifact(s): e.g. self-contained `win-x64` publish folder, or MSIX / Inno Setup / WiX installer (pick one and document).
+- Define release artifact(s): e.g. self-contained `win-x64` publish folder, or MSIX / Inno Setup / WiX installer (pick one and document). Baseline: [`docs/RELEASE.md`](RELEASE.md) and [`avalonia/Publish-Release.cmd`](../avalonia/Publish-Release.cmd).
 - Versioning: align `AssemblyInformationalVersion` / file version with git tags.
 - First-run story: link to `windows/.env.example`, `windows/data/` layout, and optional portable vs installed paths.
 - CI (optional): build + publish on tag.

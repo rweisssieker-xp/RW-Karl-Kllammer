@@ -25,6 +25,15 @@ cd avalonia
 Start-Avalonia.cmd
 ```
 
+## Release publish
+
+```cmd
+cd avalonia
+Publish-Release.cmd
+```
+
+See [`docs/RELEASE.md`](../docs/RELEASE.md) for self-contained `dotnet publish` and versioning notes.
+
 ## Current Scope
 
 - responsive operator UI with tabs for ask, dashboard, setup, knowledge, rituals, history, diagnostics, console, and live context
@@ -58,6 +67,8 @@ Start-Avalonia.cmd
 - can launch local Codex, Claude Code, and OpenClaw runs and write their output to `codex output/`
 - **smart ask handoff**: German voice/text triggers (`nimm codex`, `nimm claude code`, `nimm openclaw`, plus `mit screen` for Codex JPEG attachments) run the same local CLI flows directly from the Ask tab; IDE windows and coding keywords can **auto-route** to Codex or OpenClaw without spelling the trigger
 - **voice USP**: response speech prefers ElevenLabs when keys exist, then falls back to **Windows SAPI** offline; quick prefix buttons insert handoff phrases into the prompt
+- **Setup**: optional **auto-speak after cloud ask** (when speak responses is on) and **toggle for IDE/coding auto-route** to Codex/OpenClaw (defaults: auto-route on, auto-speak off)
+- **Support bundle**: Diagnostics tab exports a **ZIP** with `settings.json`, `.env` **key names only** (no secret values), filtered diagnostic lines, and runtime metadata
 - includes a Windows tray icon and a global push-to-talk hotkey based on `PUSH_TO_TALK_KEY`
 - includes a cursor-following overlay companion window with state transitions for ready, listening, transcribing, thinking, speaking, and error
 - surfaces proactive Karl suggestions, operator metrics and trust-first execution hints in the main UI
@@ -74,6 +85,7 @@ Start-Avalonia.cmd
   - RAG/SOP-aware prompting that can turn local AX work instructions into cautious `ax.*` plans
   - AX-first ritual execution through the dedicated ritual runtime instead of raw mouse replay
   - risk-aware blocking for high-risk ritual full runs and sensitive send/post/book actions
+- recognizes additional **Win32 fat-client** foreground kinds for live context and `ifapp` guards: **Creo/PTC** (`creo`), **Babtec** (`babtec`), **CATIA** (`catia`), **Siemens NX** (`nx`); use **inspector / `app|`** actions there — **`ax.*` is Dynamics AX only**
 
 ## Still Not Ported
 

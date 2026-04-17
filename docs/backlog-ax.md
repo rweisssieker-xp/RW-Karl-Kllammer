@@ -4,9 +4,12 @@ Derived from [`avalonia/README.md`](../avalonia/README.md) section *Still Not Po
 
 ## P0 — Reliability on real AX surfaces
 
-1. **Grid row selection** — Robust `ax.select_grid_row` (and related) across grid variants; handle virtual scrolling and selection state.
-2. **Lookup flows** — `ax.open_lookup` and post-lookup confirmation paths; consistent waits and dialog guards.
-3. **Posting / save pipelines** — End-to-end “enter data → validate → post” with explicit risk gates for high-impact actions (aligned with existing ritual risk policy).
+1. **Grid row selection** — Robust `ax.select_grid_row` (and related) across grid variants; handle virtual scrolling and selection state.  
+   *Incremental (repo):* multi-grid scoring, focus + `{HOME}` + type-ahead + `{ENTER}` on best visible row match in [`AxClientAutomationService`](../avalonia/Services/AxClientAutomationService.cs).
+2. **Lookup flows** — `ax.open_lookup` and post-lookup confirmation paths; consistent waits and dialog guards.  
+   *Incremental:* double `Alt+Down` with delays; new `ax.confirm_lookup` (OK/Select/Übernehmen/Apply).
+3. **Posting / save pipelines** — End-to-end “enter data → validate → post” with explicit risk gates for high-impact actions (aligned with existing ritual risk policy).  
+   *Incremental:* `ax.post` clicks Post/Update/Buchen/Send-style actions; ritual policy still blocks high-risk/mail contexts.
 
 ## P1 — Discovery and accessibility depth
 

@@ -2,6 +2,8 @@
 
 Build, configure, and run the native Windows client. For a feature overview, see the [root README](../README.md).
 
+Active-window **app kind** labels (browser, Dynamics AX, Creo, Babtec, CATIA, Siemens NX, and other mapped process names) come from the same shared [`AppKindDetector`](../CarolusNexus.Core/AppKindDetector.cs) as the Avalonia shell, so `ifapp` guards and ritual metadata stay consistent across runtimes.
+
 ## Requirements
 
 - Windows

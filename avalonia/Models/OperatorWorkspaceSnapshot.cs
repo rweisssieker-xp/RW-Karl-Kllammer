@@ -13,6 +13,8 @@ public sealed class OperatorWorkspaceSnapshot
     public bool SpeakResponses { get; init; }
     public bool UseLocalKnowledge { get; init; }
     public bool SuggestAutomations { get; init; }
+    public bool AutoRouteLocalAgents { get; init; } = true;
+    public bool SpeakAfterAsk { get; init; }
     public string RuntimeSummary { get; init; } = string.Empty;
     public string KnowledgeStatus { get; init; } = "knowledge: unknown";
     public IReadOnlyList<KnowledgeDocumentSummary> KnowledgeDocuments { get; init; } = Array.Empty<KnowledgeDocumentSummary>();

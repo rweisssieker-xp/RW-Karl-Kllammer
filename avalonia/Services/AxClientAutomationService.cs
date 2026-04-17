@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
-using ClippyRWAvalonia.Models;
 using System.Windows.Forms;
+using ClippyRWAvalonia.Models;
 
 namespace ClippyRWAvalonia.Services;
 
@@ -98,6 +98,27 @@ public sealed class AxClientAutomationService
             return ClickNamedAction(context, ["cancel", "&cancel", "no", "&no", "close", "&close"]);
         }
 
+        if (action.Equals("ax.confirm_lookup", StringComparison.OrdinalIgnoreCase))
+        {
+            return ClickNamedAction(context,
+            [
+                "ok", "&ok", "select", "auswählen", "&auswählen", "übernehmen", "uebernehmen", "apply", "&apply",
+                "yes", "&yes", "close", "&close"
+            ]);
+        }
+
+        if (action.Equals("ax.post", StringComparison.OrdinalIgnoreCase))
+        {
+            var postResult = ClickNamedAction(context,
+            [
+                "post", "&post", "update", "&update", "save", "&save",
+                "buchungen", "buchen", "buchung", "verbuchen", "belegen",
+                "send", "&send", "submit", "absenden"
+            ]);
+            return postResult + Environment.NewLine +
+                   "Posting: verify result in AX; high-risk rituals may block post/send in operator policy.";
+        }
+
         if (action.StartsWith("ax.read_field:", StringComparison.OrdinalIgnoreCase))
         {
             var label = action["ax.read_field:".Length..].Trim();
@@ -158,8 +179,12 @@ public sealed class AxClientAutomationService
 
             SetForegroundWindow(GetForegroundWindow());
             SetFocus((IntPtr)field.Handle);
+            Thread.Sleep(50);
             SendKeys.SendWait("%{DOWN}");
-            return $"opened lookup for {field.Label}; confirm lookup dialog before continuing";
+            Thread.Sleep(220);
+            SendKeys.SendWait("%{DOWN}");
+            Thread.Sleep(120);
+            return $"lookup keystroke sent for {field.Label}; use ax.confirm_lookup or ax.confirm_dialog when the lookup grid is ready";
         }
 
         if (action.StartsWith("ax.open_tab:", StringComparison.OrdinalIgnoreCase))
@@ -186,28 +211,7 @@ public sealed class AxClientAutomationService
         if (action.StartsWith("ax.select_grid_row:", StringComparison.OrdinalIgnoreCase))
         {
             var query = action["ax.select_grid_row:".Length..].Trim();
-            var grid = context.Grids.FirstOrDefault();
-            if (grid == null)
-            {
-                return "no AX grid detected";
-            }
-
-            var row = grid.VisibleRows
-                .Select(entry => new
-                {
-                    Row = entry,
-                    Score = ScoreText(entry, query)
-                })
-                .OrderByDescending(entry => entry.Score)
-                .FirstOrDefault();
-            if (row == null || row.Score <= 0)
-            {
-                return $"grid row not found: {query}";
-            }
-
-            SetForegroundWindow(GetForegroundWindow());
-            SetFocus((IntPtr)grid.Handle);
-            return $"selected grid row candidate in '{grid.Title}': {row.Row}";
+            return SelectGridRowWithTypeAhead(context, query);
         }
 
         if (action.StartsWith("ax.toggle_checkbox:", StringComparison.OrdinalIgnoreCase))
@@ -259,6 +263,57 @@ public sealed class AxClientAutomationService
         }
 
         return $"unsupported AX action '{action}'";
+    }
+
+    /// <summary>P0: search all grids, then focus + HOME + type-ahead + Enter (best-effort for AX grid variants).</summary>
+    private static string SelectGridRowWithTypeAhead(AxContextSnapshot context, string query)
+    {
+        if (context.Grids.Count == 0)
+        {
+            return "no AX grid detected";
+        }
+
+        AxGridSnapshot? bestGrid = null;
+        string? bestRow = null;
+        var bestScore = 0;
+        foreach (var grid in context.Grids)
+        {
+            foreach (var row in grid.VisibleRows)
+            {
+                var score = ScoreText(row, query);
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestGrid = grid;
+                    bestRow = row;
+                }
+            }
+        }
+
+        if (bestGrid == null || bestScore <= 0 || string.IsNullOrWhiteSpace(bestRow))
+        {
+            return $"grid row not found in visible rows: {query}";
+        }
+
+        SetForegroundWindow(GetForegroundWindow());
+        SetFocus(bestGrid.Handle);
+        Thread.Sleep(120);
+        SendKeys.SendWait("{HOME}");
+        Thread.Sleep(60);
+
+        var prefixChars = bestRow
+            .Where(c => char.IsLetterOrDigit(c) || c is '_' or '-')
+            .Take(18)
+            .ToArray();
+        foreach (var c in prefixChars)
+        {
+            SendKeys.SendWait(c.ToString());
+            Thread.Sleep(28);
+        }
+
+        Thread.Sleep(100);
+        SendKeys.SendWait("{ENTER}");
+        return $"grid row selection attempted in '{bestGrid.Title}' for query '{query}' (type-ahead from visible match: {bestRow})";
     }
 
     private static AxContextSnapshot CaptureContext(IntPtr handle)

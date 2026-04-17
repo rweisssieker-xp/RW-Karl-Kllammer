@@ -775,45 +775,13 @@ namespace ClickyWindows
                     ProcessName = processName,
                     WindowTitle = titleBuilder.ToString().Trim(),
                     WindowClassName = classBuilder.ToString().Trim(),
-                    AppKind = DetectAppKind(processName),
+                    AppKind = CarolusNexus.Core.AppKindDetector.FromProcessName(processName),
                     DesktopFramework = DetectDesktopFramework(classBuilder.ToString().Trim(), processName)
                 };
             }
             catch
             {
                 return new ActiveWindowInfo { WindowHandle = IntPtr.Zero, ProcessName = "unknown app", WindowTitle = string.Empty, WindowClassName = string.Empty, AppKind = "unknown", DesktopFramework = "unknown" };
-            }
-        }
-
-        private static string DetectAppKind(string processName)
-        {
-            string normalized = (processName ?? string.Empty).Trim().ToLowerInvariant();
-            switch (normalized)
-            {
-                case "chrome":
-                case "msedge":
-                case "firefox":
-                case "brave":
-                case "opera":
-                    return "browser";
-                case "explorer":
-                    return "explorer";
-                case "code":
-                case "devenv":
-                case "rider64":
-                case "idea64":
-                case "pycharm64":
-                    return "ide";
-                case "outlook":
-                case "olk":
-                    return "mail";
-                case "slack":
-                case "teams":
-                case "discord":
-                case "telegram":
-                    return "messenger";
-                default:
-                    return "generic";
             }
         }
 

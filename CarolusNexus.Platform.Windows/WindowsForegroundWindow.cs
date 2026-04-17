@@ -48,7 +48,7 @@ public static class WindowsForegroundWindow
                 ProcessName = processName,
                 WindowTitle = titleBuilder.ToString().Trim(),
                 WindowClassName = className,
-                AppKind = DetectAppKind(processName),
+                AppKind = AppKindDetector.FromProcessName(processName),
                 DesktopFramework = DetectDesktopFramework(className, processName),
                 Left = rect.Left,
                 Top = rect.Top,
@@ -60,20 +60,6 @@ public static class WindowsForegroundWindow
         {
             return new ActiveWindowInfo();
         }
-    }
-
-    private static string DetectAppKind(string processName)
-    {
-        return (processName ?? string.Empty).Trim().ToLowerInvariant() switch
-        {
-            "ax32" => "ax",
-            "chrome" or "msedge" or "firefox" or "brave" or "opera" => "browser",
-            "explorer" => "explorer",
-            "code" or "devenv" or "rider64" or "idea64" or "pycharm64" => "ide",
-            "outlook" or "olk" => "mail",
-            "slack" or "teams" or "discord" or "telegram" => "messenger",
-            _ => "generic"
-        };
     }
 
     private static string DetectDesktopFramework(string windowClassName, string processName)

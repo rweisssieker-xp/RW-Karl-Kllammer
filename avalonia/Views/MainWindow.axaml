@@ -16,12 +16,17 @@
 
   <Grid RowDefinitions="Auto,*" Margin="20" RowSpacing="16">
     <Border Classes="heroCard" Grid.Row="0">
-      <Grid ColumnDefinitions="1.3*,0.9*" RowDefinitions="Auto,Auto,Auto" RowSpacing="16" ColumnSpacing="20">
+      <Grid ColumnDefinitions="1.3*,0.9*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="16" ColumnSpacing="20">
         <StackPanel Spacing="8">
           <TextBlock Classes="kicker" Text="Windows Operator Platform" />
           <TextBlock Text="Carolus Nexus" FontSize="30" FontWeight="SemiBold" />
           <TextBlock Text="{Binding Subtitle}" Classes="muted" TextWrapping="Wrap" />
           <TextBlock Text="{Binding StatusMessage}" Foreground="#D9F4B1" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding ActiveAppOneLiner}" Foreground="#9ED8FF" TextWrapping="Wrap" />
+          <Button Classes="secondary"
+                  Content="open Live Context tab"
+                  Click="OnOpenLiveContextTabClick"
+                  HorizontalAlignment="Left" />
         </StackPanel>
 
         <StackPanel Grid.Column="1" Spacing="12">
@@ -51,7 +56,21 @@
           <Button Classes="secondary" Content="export diagnostics" Click="OnExportDiagnosticsClick" />
         </WrapPanel>
 
-        <Grid Grid.Row="2" Grid.ColumnSpan="2" ColumnDefinitions="*,*,*" ColumnSpacing="12">
+        <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Spacing="6">
+          <WrapPanel ItemSpacing="8">
+            <Border Classes="badge"><TextBlock Text="{Binding UspRailScreen}" /></Border>
+            <Border Classes="badge"><TextBlock Text="{Binding UspRailRag}" /></Border>
+            <Border Classes="badge"><TextBlock Text="{Binding UspRailRituals}" /></Border>
+            <Border Classes="badge"><TextBlock Text="{Binding UspRailAx}" /></Border>
+            <Border Classes="badge"><TextBlock Text="{Binding UspRailHandoff}" /></Border>
+            <Border Classes="badge"><TextBlock Text="{Binding UspRailVoice}" /></Border>
+          </WrapPanel>
+          <TextBlock Classes="muted"
+                     Text="Shortcuts: Ctrl+L Live Context · Ctrl+K Knowledge · Ctrl+Enter run ask"
+                     TextWrapping="Wrap" />
+        </StackPanel>
+
+        <Grid Grid.Row="3" Grid.ColumnSpan="2" ColumnDefinitions="*,*,*" ColumnSpacing="12">
           <Border Classes="metric">
             <StackPanel Spacing="4">
               <TextBlock Classes="metricLabel" Text="Operator Memory" />
@@ -61,9 +80,9 @@
           </Border>
           <Border Classes="metric" Grid.Column="1">
             <StackPanel Spacing="4">
-              <TextBlock Classes="metricLabel" Text="Live Context" />
-              <TextBlock Classes="metricValue" Text="{Binding EnvironmentState}" />
-              <TextBlock Text="{Binding ActiveAppSummary}" Classes="muted" TextWrapping="Wrap" MaxHeight="56" />
+              <TextBlock Classes="metricLabel" Text="Active window" />
+              <TextBlock Classes="metricValue" Text="{Binding ActiveAppKind}" />
+              <TextBlock Text="{Binding ActiveAppOneLiner}" Classes="muted" TextWrapping="Wrap" MaxHeight="56" />
             </StackPanel>
           </Border>
           <Border Classes="metric" Grid.Column="2">
@@ -77,61 +96,82 @@
       </Grid>
     </Border>
 
-    <TabControl Grid.Row="1">
+    <TabControl Grid.Row="1" SelectedIndex="{Binding MainTabSelectedIndex, Mode=TwoWay}">
       <TabItem Header="Ask">
         <Grid Margin="0,16,0,0" ColumnDefinitions="460,*" ColumnSpacing="16">
           <Border Classes="card" Grid.Column="0">
-            <StackPanel Spacing="12">
-              <TextBlock Classes="section" Text="Assistant Runtime" />
-              <CheckBox Content="include screenshots" IsChecked="{Binding IncludeScreens}" />
-              <CheckBox Content="use local knowledge in ask flow" IsChecked="{Binding UseKnowledgeForAsk}" />
-              <TextBlock Text="Smart handoff: say nimm codex, nimm claude code, or nimm openclaw in the prompt — or let Karl auto-route from an IDE window or coding keywords. Codex: add mit screen to attach monitor JPEGs. Speak response uses ElevenLabs when configured, otherwise Windows voice." TextWrapping="Wrap" Foreground="#8CB8E0" />
-              <WrapPanel ItemSpacing="8">
-                <TextBlock Text="prefix" VerticalAlignment="Center" Foreground="#9CB3D1" />
-                <Button Classes="secondary" Content="nimm codex" Click="OnHandoffCodexClick" />
-                <Button Classes="secondary" Content="nimm codex mit screen" Click="OnHandoffCodexScreenClick" />
-                <Button Classes="secondary" Content="nimm claude code" Click="OnHandoffClaudeCodeClick" />
-                <Button Classes="secondary" Content="nimm openclaw" Click="OnHandoffOpenClawClick" />
-              </WrapPanel>
-              <TextBlock Text="prompt" />
-              <TextBox Text="{Binding AssistantPrompt}" AcceptsReturn="True" TextWrapping="Wrap" Height="280" />
-              <TextBlock Text="AX fat-client support is active via ax.* plan steps with form/dialog/tab guards." Foreground="#9CB3D1" TextWrapping="Wrap" />
-              <WrapPanel ItemSpacing="8">
-                <Button Classes="primary" Content="ask now" Click="OnAskAssistantClick" />
-                <Button Classes="secondary" Content="smoke test" Click="OnAssistantSmokeTestClick" />
-                <Button Classes="secondary" Content="import audio + transcribe" Click="OnImportAudioClick" />
-                <Button Classes="secondary" Content="start push-to-talk" Click="OnStartSpeechCaptureClick" />
-                <Button Classes="secondary" Content="stop + ask" Click="OnStopSpeechCaptureClick" />
-                <Button Classes="secondary" Content="cancel recording" Click="OnCancelSpeechCaptureClick" />
-                <Button Classes="secondary" Content="clear conversation" Click="OnClearConversationClick" />
-                <Button Classes="secondary" Content="run plan" Click="OnRunActionPlanClick" IsEnabled="{Binding HasPendingActionPlan}" />
-                <Button Classes="secondary" Content="run next step" Click="OnRunNextActionPlanStepClick" IsEnabled="{Binding HasRemainingPlanSteps}" />
-                <Button Classes="secondary" Content="save plan as ritual" Click="OnSavePendingPlanAsRecipeClick" IsEnabled="{Binding HasPendingActionPlan}" />
-                <Button Classes="secondary" Content="clear plan" Click="OnClearActionPlanClick" />
-              </WrapPanel>
-              <TextBlock Text="{Binding SpeechCaptureState}" Foreground="#B8CAE4" />
-              <TextBlock Text="last transcript" />
-              <TextBox Text="{Binding TranscriptText}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="170" />
+            <StackPanel Spacing="10">
+              <Expander Header="Ask context (screen + knowledge)" IsExpanded="True">
+                <StackPanel Spacing="12">
+                  <TextBlock Classes="section" Text="Assistant Runtime" />
+                  <CheckBox Content="include screenshots" IsChecked="{Binding IncludeScreens}" />
+                  <CheckBox Content="use local knowledge in ask flow" IsChecked="{Binding UseKnowledgeForAsk}" />
+                  <TextBlock Text="Smart handoff: say nimm codex, nimm claude code, or nimm openclaw — or enable auto-route in Setup so IDE/coding prompts go to Codex/OpenClaw. Codex: mit screen attaches JPEGs. Diagnostics tab can export a redacted support ZIP (no .env values)." TextWrapping="Wrap" Foreground="#8CB8E0" />
+                </StackPanel>
+              </Expander>
+              <Expander Header="Handoff prefixes + voice capture" IsExpanded="True">
+                <StackPanel Spacing="12">
+                  <WrapPanel ItemSpacing="8">
+                    <TextBlock Text="prefix" VerticalAlignment="Center" Foreground="#9CB3D1" />
+                    <Button Classes="secondary" Content="nimm codex" Click="OnHandoffCodexClick" />
+                    <Button Classes="secondary" Content="nimm codex mit screen" Click="OnHandoffCodexScreenClick" />
+                    <Button Classes="secondary" Content="nimm claude code" Click="OnHandoffClaudeCodeClick" />
+                    <Button Classes="secondary" Content="nimm openclaw" Click="OnHandoffOpenClawClick" />
+                  </WrapPanel>
+                  <WrapPanel ItemSpacing="8">
+                    <Button Classes="secondary" Content="import audio + transcribe" Click="OnImportAudioClick" />
+                    <Button Classes="secondary" Content="start push-to-talk" Click="OnStartSpeechCaptureClick" />
+                    <Button Classes="secondary" Content="stop + ask" Click="OnStopSpeechCaptureClick" />
+                    <Button Classes="secondary" Content="cancel recording" Click="OnCancelSpeechCaptureClick" />
+                  </WrapPanel>
+                  <TextBlock Text="{Binding SpeechCaptureState}" Foreground="#B8CAE4" />
+                  <TextBlock Text="last transcript" />
+                  <TextBox Text="{Binding TranscriptText}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="120" />
+                </StackPanel>
+              </Expander>
+              <Expander Header="Prompt, ask, and action plan" IsExpanded="True">
+                <StackPanel Spacing="12">
+                  <TextBlock Text="prompt" />
+                  <TextBox Text="{Binding AssistantPrompt}" AcceptsReturn="True" TextWrapping="Wrap" Height="200" />
+                  <TextBlock Text="AX fat-client support is active via ax.* plan steps with form/dialog/tab guards." Foreground="#9CB3D1" TextWrapping="Wrap" />
+                  <WrapPanel ItemSpacing="8">
+                    <Button Classes="primary" Content="ask now" Click="OnAskAssistantClick" />
+                    <Button Classes="secondary" Content="smoke test" Click="OnAssistantSmokeTestClick" />
+                    <Button Classes="secondary" Content="clear conversation" Click="OnClearConversationClick" />
+                  </WrapPanel>
+                  <WrapPanel ItemSpacing="8">
+                    <Button Classes="secondary" Content="run plan" Click="OnRunActionPlanClick" IsEnabled="{Binding HasPendingActionPlan}" />
+                    <Button Classes="secondary" Content="run next step" Click="OnRunNextActionPlanStepClick" IsEnabled="{Binding HasRemainingPlanSteps}" />
+                    <Button Classes="secondary" Content="save plan as ritual" Click="OnSavePendingPlanAsRecipeClick" IsEnabled="{Binding HasPendingActionPlan}" />
+                    <Button Classes="secondary" Content="clear plan" Click="OnClearActionPlanClick" />
+                  </WrapPanel>
+                </StackPanel>
+              </Expander>
             </StackPanel>
           </Border>
 
           <Border Classes="card" Grid.Column="1">
-            <StackPanel Spacing="12">
-              <TextBlock Classes="section" Text="Assistant Response" />
-              <WrapPanel ItemSpacing="8">
-                <Button Classes="secondary" Content="speak response" Click="OnSpeakResponseClick" />
-                <TextBlock Text="{Binding LastGeneratedAudioPath}" Width="360" TextWrapping="Wrap" Foreground="#9CB3D1" />
-              </WrapPanel>
-              <TextBox Text="{Binding AssistantResponse}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="420" />
-              <TextBlock Classes="section" Text="Retrieval + Context" />
-              <TextBox Text="{Binding RetrievalSources}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="170" />
-              <TextBlock Classes="section" Text="Action Plan Preview" />
-              <TextBlock Text="{Binding ActionPlanState}" Foreground="#B8CAE4" />
-              <TextBlock Text="{Binding CurrentPlanStepSummary}" Foreground="#9CB3D1" TextWrapping="Wrap" />
-              <TextBlock Text="{Binding SafetyPolicySummary}" Foreground="#FFDFA5" TextWrapping="Wrap" />
-              <TextBox Text="{Binding ActionPlanPreview}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="150" />
-              <TextBlock Classes="section" Text="Action Plan Execution" />
-              <TextBox Text="{Binding ActionPlanExecutionLog}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="170" />
+            <StackPanel Spacing="10">
+              <Expander Header="Response and retrieval" IsExpanded="True">
+                <StackPanel Spacing="12">
+                  <WrapPanel ItemSpacing="8">
+                    <Button Classes="secondary" Content="speak response" Click="OnSpeakResponseClick" />
+                    <TextBlock Text="{Binding LastGeneratedAudioPath}" Width="360" TextWrapping="Wrap" Foreground="#9CB3D1" />
+                  </WrapPanel>
+                  <TextBox Text="{Binding AssistantResponse}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="280" />
+                  <TextBlock Classes="section" Text="Retrieval + Context" />
+                  <TextBox Text="{Binding RetrievalSources}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="120" />
+                </StackPanel>
+              </Expander>
+              <Expander Header="Action plan, safety, execution log" IsExpanded="True">
+                <StackPanel Spacing="12">
+                  <TextBlock Text="{Binding ActionPlanState}" Foreground="#B8CAE4" />
+                  <TextBlock Text="{Binding CurrentPlanStepSummary}" Foreground="#9CB3D1" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding SafetyPolicySummary}" Foreground="#FFDFA5" TextWrapping="Wrap" />
+                  <TextBox Text="{Binding ActionPlanPreview}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="120" />
+                  <TextBox Text="{Binding ActionPlanExecutionLog}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="140" />
+                </StackPanel>
+              </Expander>
             </StackPanel>
           </Border>
         </Grid>
@@ -140,37 +180,55 @@
       <TabItem Header="Dashboard">
         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
           <WrapPanel Margin="0,16,0,0" ItemSpacing="16">
-            <Border Classes="card" Width="460" MinWidth="320">
-              <StackPanel Spacing="12">
-                <TextBlock Classes="section" Text="Environment + Routing" />
-                <TextBlock Classes="kicker" Text="Operator Brain" />
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                  <Border Classes="badge"><TextBlock Text="{Binding Provider}" /></Border>
-                  <Border Classes="badge"><TextBlock Text="{Binding Mode}" /></Border>
-                </Grid>
-                <TextBlock Text="{Binding Model}" Foreground="#B9CAE1" />
-                <TextBlock Text="{Binding EnvSummary}" TextWrapping="Wrap" />
-              </StackPanel>
-            </Border>
+            <Button Classes="dashboardNav"
+                    Width="460"
+                    MinWidth="320"
+                    Click="OnDashboardNavigateSetupClick"
+                    ToolTip.Tip="Open Setup (provider, keys, toggles)">
+              <Border Classes="card" HorizontalAlignment="Stretch">
+                <StackPanel Spacing="12">
+                  <TextBlock Classes="section" Text="Environment + Routing" />
+                  <TextBlock Classes="kicker" Text="Operator Brain — click to open Setup" />
+                  <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Border Classes="badge"><TextBlock Text="{Binding Provider}" /></Border>
+                    <Border Classes="badge"><TextBlock Text="{Binding Mode}" /></Border>
+                  </Grid>
+                  <TextBlock Text="{Binding Model}" Foreground="#B9CAE1" />
+                  <TextBlock Text="{Binding EnvSummary}" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+            </Button>
 
-            <Border Classes="card" Width="460" MinWidth="320">
-              <StackPanel Spacing="12">
-                <TextBlock Classes="section" Text="Knowledge + Memory" />
-                <TextBlock Classes="kicker" Text="Reusable Memory" />
-                <TextBlock Text="{Binding KnowledgeStatus}" />
-                <TextBlock Text="{Binding CountsSummary}" TextWrapping="Wrap" />
-                <TextBlock Text="{Binding OperatorMetrics}" TextWrapping="Wrap" Foreground="#9CB3D1" />
-              </StackPanel>
-            </Border>
+            <Button Classes="dashboardNav"
+                    Width="460"
+                    MinWidth="320"
+                    Click="OnDashboardNavigateKnowledgeClick"
+                    ToolTip.Tip="Open Knowledge tab">
+              <Border Classes="card" HorizontalAlignment="Stretch">
+                <StackPanel Spacing="12">
+                  <TextBlock Classes="section" Text="Knowledge + Memory" />
+                  <TextBlock Classes="kicker" Text="Reusable Memory — click to manage docs" />
+                  <TextBlock Text="{Binding KnowledgeStatus}" />
+                  <TextBlock Text="{Binding CountsSummary}" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding OperatorMetrics}" TextWrapping="Wrap" Foreground="#9CB3D1" />
+                </StackPanel>
+              </Border>
+            </Button>
 
-            <Border Classes="card" Width="460" MinWidth="320">
-              <StackPanel Spacing="12">
-                <TextBlock Classes="section" Text="Live Context" />
-                <TextBlock Classes="kicker" Text="Current Surface" />
-                <TextBlock Text="{Binding ActiveAppSummary}" TextWrapping="Wrap" />
-                <TextBlock Text="{Binding AxSuggestedActions}" TextWrapping="Wrap" Foreground="#9CB3D1" />
-              </StackPanel>
-            </Border>
+            <Button Classes="dashboardNav"
+                    Width="460"
+                    MinWidth="320"
+                    Click="OnDashboardNavigateLiveContextClick"
+                    ToolTip.Tip="Open Live Context (inspector)">
+              <Border Classes="card" HorizontalAlignment="Stretch">
+                <StackPanel Spacing="12">
+                  <TextBlock Classes="section" Text="Live Context" />
+                  <TextBlock Classes="kicker" Text="Current Surface — click for inspector" />
+                  <TextBlock Text="{Binding ActiveAppSummary}" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding AxSuggestedActions}" TextWrapping="Wrap" Foreground="#9CB3D1" />
+                </StackPanel>
+              </Border>
+            </Button>
 
             <Border Classes="card" Width="460" MinWidth="320">
               <StackPanel Spacing="12">
@@ -181,41 +239,53 @@
               </StackPanel>
             </Border>
 
-            <Border Classes="card" Width="460" MinWidth="320">
-              <StackPanel Spacing="12">
-                <TextBlock Classes="section" Text="Recent Rituals" />
-                <TextBlock Classes="kicker" Text="Operator Patterns" />
-                <ItemsControl ItemsSource="{Binding Recipes}">
-                  <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                      <TextBlock Text="{Binding Name}" />
-                    </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-                </ItemsControl>
-              </StackPanel>
-            </Border>
+            <Button Classes="dashboardNav"
+                    Width="460"
+                    MinWidth="320"
+                    Click="OnDashboardNavigateRitualsClick"
+                    ToolTip.Tip="Open Rituals tab (selects first ritual if any)">
+              <Border Classes="card" HorizontalAlignment="Stretch">
+                <StackPanel Spacing="12">
+                  <TextBlock Classes="section" Text="Recent Rituals" />
+                  <TextBlock Classes="kicker" Text="Operator Patterns — click to edit or run" />
+                  <ItemsControl ItemsSource="{Binding Recipes}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <TextBlock Text="{Binding Name}" />
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </Border>
+            </Button>
 
-            <Border Classes="card" Width="460" MinWidth="320">
-              <StackPanel Spacing="12">
-                <TextBlock Classes="section" Text="Recent Watch Sessions" />
-                <TextBlock Classes="kicker" Text="Captured Guidance" />
-                <ItemsControl ItemsSource="{Binding WatchSessions}">
-                  <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                      <TextBlock Text="{Binding Prompt}" TextTrimming="CharacterEllipsis" MaxWidth="380" />
-                    </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-                </ItemsControl>
-              </StackPanel>
-            </Border>
+            <Button Classes="dashboardNav"
+                    Width="460"
+                    MinWidth="320"
+                    Click="OnDashboardNavigateHistoryClick"
+                    ToolTip.Tip="Open History tab">
+              <Border Classes="card" HorizontalAlignment="Stretch">
+                <StackPanel Spacing="12">
+                  <TextBlock Classes="section" Text="Recent Watch Sessions" />
+                  <TextBlock Classes="kicker" Text="Captured Guidance — click for action history" />
+                  <ItemsControl ItemsSource="{Binding WatchSessions}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <TextBlock Text="{Binding Prompt}" TextTrimming="CharacterEllipsis" MaxWidth="380" />
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </Border>
+            </Button>
           </WrapPanel>
         </ScrollViewer>
       </TabItem>
 
       <TabItem Header="Setup">
         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-          <Grid Margin="0,16,0,0" ColumnDefinitions="420,*" ColumnSpacing="16">
-            <Border Classes="card" Grid.Column="0">
+          <Grid Margin="0,16,0,0" RowDefinitions="Auto,Auto" ColumnDefinitions="420,*" ColumnSpacing="16" RowSpacing="16">
+            <Border Classes="card" Grid.Column="0" Grid.Row="0">
               <StackPanel Spacing="14">
                 <TextBlock Classes="section" Text="Provider + Mode" />
                 <TextBlock Text="provider" />
@@ -225,6 +295,8 @@
                 <TextBlock Text="model" />
                 <TextBox Text="{Binding Model}" />
                 <CheckBox Content="speak responses" IsChecked="{Binding SpeakResponses}" />
+                <CheckBox Content="after cloud ask, auto-speak reply (ElevenLabs or Windows voice)" IsChecked="{Binding SpeakAfterAsk}" />
+                <CheckBox Content="auto-route IDE / coding prompts to local Codex or OpenClaw (without saying nimm …)" IsChecked="{Binding AutoRouteLocalAgents}" />
                 <CheckBox Content="use local knowledge" IsChecked="{Binding UseLocalKnowledge}" />
                 <CheckBox Content="suggest automations" IsChecked="{Binding SuggestAutomations}" />
                 <WrapPanel ItemSpacing="10">
@@ -234,12 +306,29 @@
               </StackPanel>
             </Border>
 
-            <Border Classes="card" Grid.Column="1">
+            <Border Classes="card" Grid.Column="1" Grid.Row="0">
               <StackPanel Spacing="14">
                 <TextBlock Classes="section" Text="Health + Environment" />
                 <TextBlock Text="{Binding EnvPath}" TextWrapping="Wrap" />
                 <TextBox Text="{Binding EnvSummary}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="220" />
                 <TextBlock Text="This tab replaces the WinForms setup wizard and provider summary. It edits the existing settings.json while keeping the current .env file in the Windows runtime as the secret source." TextWrapping="Wrap" Foreground="#C4D5EB" />
+                <TextBlock Text="TTS: cloud replies use ElevenLabs when configured; otherwise Windows SAPI speaks offline. MP3 from ElevenLabs opens in your default player (not embedded WMP like legacy)." TextWrapping="Wrap" Foreground="#8CB8E0" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card" Grid.Row="1" Grid.ColumnSpan="2">
+              <StackPanel Spacing="12">
+                <TextBlock Classes="section" Text="Quick start" />
+                <TextBlock Classes="kicker" Text="Guided first steps" />
+                <WrapPanel ItemSpacing="8">
+                  <Button Classes="secondary" Content="1 · Check .env + provider" Click="OnOnboardingEnvClick" />
+                  <Button Classes="secondary" Content="2 · Open Knowledge" Click="OnOnboardingKnowledgeClick" />
+                  <Button Classes="secondary" Content="3 · Try push-to-talk" Click="OnOnboardingPttClick" />
+                  <Button Classes="secondary" Content="4 · Run smoke test (Ask tab)" Click="OnOnboardingAskSmokeClick" ToolTip.Tip="Ctrl+Enter also runs ask from anywhere in this window" />
+                </WrapPanel>
+                <TextBlock Classes="section" Text="Shipping and AX depth" />
+                <TextBlock TextWrapping="Wrap" Foreground="#9CB3D1"
+                           Text="Release: see docs/RELEASE.md and avalonia/Publish-Release.cmd for self-contained publish. AX enterprise depth (grid, lookup, UIA): docs/backlog-ax.md and docs/epics-shipping-local-first.md." />
               </StackPanel>
             </Border>
           </Grid>
@@ -323,27 +412,32 @@
                   <TextBox Text="{Binding SelectedRecipeSourceType}" />
                 </StackPanel>
                 <StackPanel Grid.Column="1">
-                  <TextBlock Text="risk" />
+                  <TextBlock Text="risk"
+                             ToolTip.Tip="low / medium / high — drives confirmation: high blocks full automatic runs and sensitive outbound actions." />
                   <TextBox Text="{Binding SelectedRecipeRisk}" />
                 </StackPanel>
               </Grid>
               <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                 <StackPanel>
-                  <TextBlock Text="guard app" />
+                  <TextBlock Text="guard app"
+                             ToolTip.Tip="Only run when foreground AppKind contains this (e.g. ax, creo, browser). Matches Carolus Nexus AppKind labels." />
                   <TextBox Text="{Binding SelectedRecipeGuardApp}" />
                 </StackPanel>
                 <StackPanel Grid.Column="1">
-                  <TextBlock Text="guard form" />
+                  <TextBlock Text="guard form"
+                             ToolTip.Tip="Optional AX form name substring — ritual skips if the active AX form does not match." />
                   <TextBox Text="{Binding SelectedRecipeGuardForm}" />
                 </StackPanel>
               </Grid>
               <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                 <StackPanel>
-                  <TextBlock Text="guard dialog" />
+                  <TextBlock Text="guard dialog"
+                             ToolTip.Tip="Optional AX dialog title substring — narrows execution to the expected dialog." />
                   <TextBox Text="{Binding SelectedRecipeGuardDialog}" />
                 </StackPanel>
                 <StackPanel Grid.Column="1">
-                  <TextBlock Text="guard tab" />
+                  <TextBlock Text="guard tab"
+                             ToolTip.Tip="Optional AX tab label substring — step runs only when that tab is active." />
                   <TextBox Text="{Binding SelectedRecipeGuardTab}" />
                 </StackPanel>
               </Grid>
@@ -380,7 +474,8 @@
                     <TextBox Text="{Binding RitualStepActionType}" />
                   </StackPanel>
                   <StackPanel Grid.Column="1">
-                    <TextBlock Text="risk" />
+                    <TextBlock Text="risk"
+                               ToolTip.Tip="Per-step risk overrides recipe default for preview / step-through policies." />
                     <TextBox Text="{Binding RitualStepRisk}" />
                   </StackPanel>
                 </Grid>
@@ -398,21 +493,25 @@
                 </Grid>
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
                   <StackPanel>
-                    <TextBlock Text="if app" />
+                    <TextBlock Text="if app"
+                               ToolTip.Tip="Run this step only when active AppKind contains this token (e.g. ax, creo)." />
                     <TextBox Text="{Binding RitualStepIfApp}" />
                   </StackPanel>
                   <StackPanel Grid.Column="1">
-                    <TextBlock Text="if form" />
+                    <TextBlock Text="if form"
+                               ToolTip.Tip="AX only: step runs when the captured form name matches this substring." />
                     <TextBox Text="{Binding RitualStepIfForm}" />
                   </StackPanel>
                 </Grid>
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
                   <StackPanel>
-                    <TextBlock Text="if dialog" />
+                    <TextBlock Text="if dialog"
+                               ToolTip.Tip="AX only: requires a dialog whose title matches this substring." />
                     <TextBox Text="{Binding RitualStepIfDialog}" />
                   </StackPanel>
                   <StackPanel Grid.Column="1">
-                    <TextBlock Text="if tab" />
+                    <TextBlock Text="if tab"
+                               ToolTip.Tip="AX only: requires the named tab to be selected." />
                     <TextBox Text="{Binding RitualStepIfTab}" />
                   </StackPanel>
                 </Grid>
@@ -512,6 +611,7 @@
                 <WrapPanel ItemSpacing="8">
                   <Button Classes="primary" Content="filter" Click="OnDiagnosticsFilterClick" />
                   <Button Classes="secondary" Content="export" Click="OnExportDiagnosticsClick" />
+                  <Button Classes="secondary" Content="support bundle (zip)" Click="OnExportSupportBundleClick" />
                   <Button Classes="secondary" Content="clear logs" Click="OnClearDiagnosticsClick" />
                 </WrapPanel>
               </StackPanel>
@@ -562,6 +662,9 @@
               <StackPanel Spacing="12">
                 <TextBlock Classes="section" Text="Active Window" />
                 <Button Classes="primary" Content="refresh active window" Click="OnRefreshActiveWindowClick" HorizontalAlignment="Left" />
+                <TextBlock Text="{Binding LiveContextFatClientHint}"
+                           TextWrapping="Wrap"
+                           Foreground="#FFDFA5" />
                 <TextBox Text="{Binding ActiveAppSummary}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="300" />
                 <TextBlock Classes="section" Text="AX Context" />
                 <TextBox Text="{Binding AxContextSummary}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="260" />

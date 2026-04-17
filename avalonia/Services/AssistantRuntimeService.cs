@@ -448,8 +448,9 @@ public sealed class AssistantRuntimeService
         builder.AppendLine("When you can identify a concrete desktop target, you may append one point tag: [POINT:screenIndex|xPercent|yPercent|short label].");
         builder.AppendLine("When a short desktop workflow is helpful, you may append one action chain: [ACTIONS:app|focus_window|ifapp=browser;app|focus_control:Search|retry=2|wait=250].");
         builder.AppendLine("Only use app actions that are short, reversible, and obvious from the current desktop state.");
-        builder.AppendLine("For Microsoft Dynamics AX / AX 2012 style fat clients, prefer ax.* actions such as ax.read_field, ax.set_field, ax.click_action, ax.open_tab, ax.read_grid, ax.select_grid_row, ax.confirm_dialog, ax.cancel_dialog, ax.wait_for_form, ax.wait_for_dialog and ax.wait_for_text.");
+        builder.AppendLine("For Microsoft Dynamics AX / AX 2012 style fat clients, prefer ax.* actions such as ax.read_field, ax.set_field, ax.click_action, ax.open_tab, ax.open_lookup, ax.confirm_lookup, ax.read_grid, ax.select_grid_row, ax.post, ax.confirm_dialog, ax.cancel_dialog, ax.wait_for_form, ax.wait_for_dialog and ax.wait_for_text.");
         builder.AppendLine("When local SOP or work-instruction snippets clearly describe an AX workflow, convert them into a cautious ax.* action plan instead of only summarizing the text.");
+        builder.AppendLine("For PTC Creo, Babtec (B4/BCT), CATIA, Siemens NX, and other Win32 fat clients that are not Dynamics AX: use app| inspector-style actions (list_controls, read_form, focus_control, etc.) and |ifapp=creo|ifapp=babtec|ifapp=catia|ifapp=nx guards that match the active window; do not emit ax.* for those products.");
 
         if (recipes.Count > 0)
         {
@@ -473,6 +474,7 @@ public sealed class AssistantRuntimeService
         builder.AppendLine("If you suggest a short desktop plan, use [ACTIONS:...] with optional |wait=250, |ifapp=word and |retry=2 directives on each step.");
         builder.AppendLine("For AX fat-client tasks, use ax.* step arguments inside [ACTIONS:...] and you may add |if_form=..., |if_dialog=..., |if_tab=... and |on_fail=skip.");
         builder.AppendLine("If local knowledge describes a Dynamics AX procedure, prefer emitting an ax.* plan that follows the SOP and keep the visible answer short.");
+        builder.AppendLine("For Creo, Babtec, CATIA, NX, or other non-AX fat clients, use app| steps with appropriate |ifapp=... guards instead of ax.*.");
 
         if (knowledgeChunks.Count > 0)
         {

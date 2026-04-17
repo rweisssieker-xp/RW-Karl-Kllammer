@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Avalonia.Threading;
 using CarolusNexus.Core;
 using CarolusNexus.Platform.Windows;
 using ClippyRWAvalonia.Models;
@@ -34,6 +35,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private bool _speakResponses;
     private bool _useLocalKnowledge;
     private bool _suggestAutomations;
+    private bool _autoRouteLocalAgents = true;
+    private bool _speakAfterAsk;
     private string _selectedRecipeName = string.Empty;
     private string _selectedRecipePrompt = string.Empty;
     private string _selectedRecipeMode = "automation";
@@ -81,6 +84,16 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private int _selectedHistoryPromotionCount = 1;
     private string _envSummary = string.Empty;
     private string _activeAppSummary = "not loaded";
+    private string _activeAppKind = "generic";
+    private string _activeAppOneLiner = "active window: (refresh)";
+    private string _liveContextFatClientHint = string.Empty;
+    private string _uspRailScreen = "ask screen: on";
+    private string _uspRailRag = "ask RAG: on";
+    private string _uspRailRituals = "rituals: 0";
+    private string _uspRailAx = "foreground: —";
+    private string _uspRailHandoff = "auto-route: on";
+    private string _uspRailVoice = "voice: off";
+    private int _mainTabSelectedIndex;
     private string _axContextSummary = "no active AX context";
     private string _axSuggestedActions = "ax.* actions become available when an AX client is active";
     private string _consolePrompt = string.Empty;
@@ -179,7 +192,15 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
     public bool SpeakResponses
     {
         get => _speakResponses;
-        set => SetField(ref _speakResponses, value);
+        set
+        {
+            if (!SetField(ref _speakResponses, value))
+            {
+                return;
+            }
+
+            UpdateUspRail();
+        }
     }
 
     public bool UseLocalKnowledge
@@ -192,6 +213,34 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
     {
         get => _suggestAutomations;
         set => SetField(ref _suggestAutomations, value);
+    }
+
+    public bool AutoRouteLocalAgents
+    {
+        get => _autoRouteLocalAgents;
+        set
+        {
+            if (!SetField(ref _autoRouteLocalAgents, value))
+            {
+                return;
+            }
+
+            UpdateUspRail();
+        }
+    }
+
+    public bool SpeakAfterAsk
+    {
+        get => _speakAfterAsk;
+        set
+        {
+            if (!SetField(ref _speakAfterAsk, value))
+            {
+                return;
+            }
+
+            UpdateUspRail();
+        }
     }
 
     public string EnvironmentState { get; private set; } = "env missing";
@@ -213,6 +262,78 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
         get => _activeAppSummary;
         set => SetField(ref _activeAppSummary, value);
     }
+
+    /// <summary>Compact line for hero: display name and app kind.</summary>
+    public string ActiveAppOneLiner
+    {
+        get => _activeAppOneLiner;
+        private set => SetField(ref _activeAppOneLiner, value);
+    }
+
+    public string ActiveAppKind
+    {
+        get => _activeAppKind;
+        private set => SetField(ref _activeAppKind, value);
+    }
+
+    /// <summary>Non-AX fat-client hint for Live Context; empty when not applicable.</summary>
+    public string LiveContextFatClientHint
+    {
+        get => _liveContextFatClientHint;
+        private set => SetField(ref _liveContextFatClientHint, value);
+    }
+
+    public string UspRailScreen
+    {
+        get => _uspRailScreen;
+        private set => SetField(ref _uspRailScreen, value);
+    }
+
+    public string UspRailRag
+    {
+        get => _uspRailRag;
+        private set => SetField(ref _uspRailRag, value);
+    }
+
+    public string UspRailRituals
+    {
+        get => _uspRailRituals;
+        private set => SetField(ref _uspRailRituals, value);
+    }
+
+    public string UspRailAx
+    {
+        get => _uspRailAx;
+        private set => SetField(ref _uspRailAx, value);
+    }
+
+    public string UspRailHandoff
+    {
+        get => _uspRailHandoff;
+        private set => SetField(ref _uspRailHandoff, value);
+    }
+
+    public string UspRailVoice
+    {
+        get => _uspRailVoice;
+        private set => SetField(ref _uspRailVoice, value);
+    }
+
+    public int MainTabSelectedIndex
+    {
+        get => _mainTabSelectedIndex;
+        set => SetField(ref _mainTabSelectedIndex, value);
+    }
+
+    public const int TabAsk = 0;
+    public const int TabDashboard = 1;
+    public const int TabSetup = 2;
+    public const int TabKnowledge = 3;
+    public const int TabRituals = 4;
+    public const int TabHistory = 5;
+    public const int TabDiagnostics = 6;
+    public const int TabConsole = 7;
+    public const int TabLiveContext = 8;
 
     public string AxContextSummary
     {
@@ -694,13 +815,29 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
     public bool IncludeScreens
     {
         get => _includeScreens;
-        set => SetField(ref _includeScreens, value);
+        set
+        {
+            if (!SetField(ref _includeScreens, value))
+            {
+                return;
+            }
+
+            UpdateUspRail();
+        }
     }
 
     public bool UseKnowledgeForAsk
     {
         get => _useKnowledgeForAsk;
-        set => SetField(ref _useKnowledgeForAsk, value);
+        set
+        {
+            if (!SetField(ref _useKnowledgeForAsk, value))
+            {
+                return;
+            }
+
+            UpdateUspRail();
+        }
     }
 
     public bool IsAssistantBusy
@@ -754,9 +891,13 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
         SpeakResponses = snapshot.SpeakResponses;
         UseLocalKnowledge = snapshot.UseLocalKnowledge;
         SuggestAutomations = snapshot.SuggestAutomations;
+        AutoRouteLocalAgents = snapshot.AutoRouteLocalAgents;
+        SpeakAfterAsk = snapshot.SpeakAfterAsk;
         EnvironmentState = snapshot.EnvExists ? "env loaded" : "env missing";
         KnowledgeState = snapshot.UseLocalKnowledge ? "local knowledge on" : "local knowledge off";
-        SpeechState = snapshot.SpeakResponses ? "voice responses on" : "voice responses off";
+        SpeechState = snapshot.SpeakResponses
+            ? (snapshot.SpeakAfterAsk ? "voice on • auto-speak after ask" : "voice responses on")
+            : "voice responses off";
         AutomationState = snapshot.SuggestAutomations ? "ritual capture on" : "ritual capture off";
         RuntimeSummary = snapshot.RuntimeSummary;
         KnowledgeStatus = snapshot.KnowledgeStatus;
@@ -804,11 +945,20 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
         OnPropertyChanged(nameof(KnowledgeStatus));
         OnPropertyChanged(nameof(CountsSummary));
         OnPropertyChanged(nameof(HasPendingActionPlan));
+        UpdateUspRail();
     }
 
     public void SaveSettings()
     {
-        _workspaceService.SaveSettings(Provider, Model, Mode, SpeakResponses, UseLocalKnowledge, SuggestAutomations);
+        _workspaceService.SaveSettings(
+            Provider,
+            Model,
+            Mode,
+            SpeakResponses,
+            UseLocalKnowledge,
+            SuggestAutomations,
+            AutoRouteLocalAgents,
+            SpeakAfterAsk);
         StatusMessage = "Saved Avalonia operator settings.";
         Refresh();
     }
@@ -1310,6 +1460,15 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
         return path;
     }
 
+    public string ExportSupportBundle()
+    {
+        var path = _workspaceService.ExportSupportBundle(Diagnostics.ToList());
+        StatusMessage = $"Exported support bundle to {path}.";
+        _windowsShellService.UpdateTooltip(StatusMessage);
+        Refresh();
+        return path;
+    }
+
     public void ClearDiagnostics()
     {
         _workspaceService.ClearDiagnosticsLogs();
@@ -1320,6 +1479,9 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
     public void RefreshActiveWindow()
     {
         var active = _workspaceService.GetActiveWindow();
+        ActiveAppKind = string.IsNullOrWhiteSpace(active.AppKind) ? "generic" : active.AppKind.Trim();
+        ActiveAppOneLiner = $"{active.DisplayName} — app kind: {ActiveAppKind}";
+        LiveContextFatClientHint = BuildFatClientInspectorHint(ActiveAppKind);
         ActiveAppSummary = $"active window: {active.DisplayName}{Environment.NewLine}class: {active.WindowClassName}{Environment.NewLine}app kind: {active.AppKind}{Environment.NewLine}framework: {active.DesktopFramework}{Environment.NewLine}bounds: {active.Left},{active.Top} {active.Width}x{active.Height}";
         var axContext = _axClientAutomationService.CaptureActiveContext();
         AxContextSummary = axContext.Summary;
@@ -1332,6 +1494,105 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
         {
             _companionOverlayService.ShowTransient("ready", ProactiveSuggestionSummary, 3200, "low");
         }
+
+        UpdateUspRail();
+    }
+
+    public void NavigateToLiveContext()
+    {
+        MainTabSelectedIndex = TabLiveContext;
+        StatusMessage = "Switched to Live Context.";
+    }
+
+    public void NavigateToAsk()
+    {
+        MainTabSelectedIndex = TabAsk;
+    }
+
+    public void NavigateToKnowledge()
+    {
+        MainTabSelectedIndex = TabKnowledge;
+    }
+
+    public void NavigateToRituals(bool selectFirstRecipe = false)
+    {
+        MainTabSelectedIndex = TabRituals;
+        if (selectFirstRecipe && Recipes.Count > 0)
+        {
+            SetSelectedRecipe(Recipes[0]);
+        }
+    }
+
+    public void NavigateToSetup()
+    {
+        MainTabSelectedIndex = TabSetup;
+    }
+
+    public void NavigateToDiagnostics()
+    {
+        MainTabSelectedIndex = TabDiagnostics;
+    }
+
+    public void NavigateToHistory()
+    {
+        MainTabSelectedIndex = TabHistory;
+    }
+
+    public void OnboardingCheckEnvironment()
+    {
+        NavigateToSetup();
+        StatusMessage = EnvironmentState.Contains("missing", StringComparison.OrdinalIgnoreCase)
+            ? "Copy windows/.env.example to windows/.env and add keys, then refresh."
+            : "Environment file present. Run provider smoke test from Ask tab.";
+    }
+
+    public void OnboardingOpenKnowledgeFolder()
+    {
+        NavigateToKnowledge();
+        StatusMessage = "Import or drop docs into windows/data/knowledge/, then reindex.";
+    }
+
+    public void OnboardingTryPushToTalk()
+    {
+        NavigateToAsk();
+        StatusMessage = "Use start push-to-talk / stop + ask on Ask tab, or the global hotkey from settings.";
+    }
+
+    public void OnboardingOpenAskSmoke()
+    {
+        NavigateToAsk();
+        StatusMessage = "On Ask tab: click smoke test to verify your provider and keys.";
+    }
+
+    private void UpdateUspRail()
+    {
+        var snapshot = _workspaceService.Load();
+        var active = _workspaceService.GetActiveWindow();
+        var kind = string.IsNullOrWhiteSpace(active.AppKind) ? "generic" : active.AppKind.Trim().ToLowerInvariant();
+        UspRailScreen = _includeScreens ? "screen • on" : "screen • off";
+        UspRailRag = _useKnowledgeForAsk ? "RAG • on" : "RAG • off";
+        UspRailRituals = $"{snapshot.Recipes.Count} rituals";
+        UspRailHandoff = _autoRouteLocalAgents ? "handoff • auto" : "handoff • manual";
+        UspRailVoice = snapshot.SpeakResponses
+            ? (snapshot.SpeakAfterAsk ? "voice • +after ask" : "voice • on")
+            : "voice • off";
+        UspRailAx = kind == "ax" ? "fg • AX" : $"fg • {kind}";
+    }
+
+    private static string BuildFatClientInspectorHint(string appKind)
+    {
+        var k = (appKind ?? string.Empty).Trim().ToLowerInvariant();
+        if (k == "ax")
+        {
+            return "Dynamics AX: use AX Inspector shortcuts and ax.* plan steps here; guards if_form / if_dialog / if_tab narrow execution.";
+        }
+
+        if (k is "creo" or "babtec" or "catia" or "nx")
+        {
+            return "Win32 fat client (non-AX): use Desktop Inspector and app| actions — do not use ax.* plan steps; use ritual ifapp=" + k + ".";
+        }
+
+        return string.Empty;
     }
 
     public void RunInspectorAction(string? actionArgument = null)
@@ -1466,23 +1727,26 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
                 return;
             }
 
-            var active = _workspaceService.GetActiveWindow();
-            var route = AgentHandoffTriggers.DetectIntentRoute(promptRaw, active);
-            if (string.Equals(route, "codex", StringComparison.OrdinalIgnoreCase))
+            if (AutoRouteLocalAgents)
             {
-                StatusMessage = "Auto-routing to Codex from context…";
-                _windowsShellService.UpdateTooltip(StatusMessage);
-                await CompleteCodexHandoffAsync("nimm codex " + promptRaw).ConfigureAwait(false);
-                return;
-            }
+                var active = _workspaceService.GetActiveWindow();
+                var route = AgentHandoffTriggers.DetectIntentRoute(promptRaw, active);
+                if (string.Equals(route, "codex", StringComparison.OrdinalIgnoreCase))
+                {
+                    StatusMessage = "Auto-routing to Codex from context…";
+                    _windowsShellService.UpdateTooltip(StatusMessage);
+                    await CompleteCodexHandoffAsync("nimm codex " + promptRaw).ConfigureAwait(false);
+                    return;
+                }
 
-            if (string.Equals(route, "openclaw", StringComparison.OrdinalIgnoreCase))
-            {
-                StatusMessage = "Auto-routing to OpenClaw from context…";
-                _windowsShellService.UpdateTooltip(StatusMessage);
-                var routed = "nimm openclaw " + promptRaw;
-                await CompleteLocalAgentHandoffAsync("openclaw", AgentHandoffTriggers.RemoveOpenClawPrompt(routed)).ConfigureAwait(false);
-                return;
+                if (string.Equals(route, "openclaw", StringComparison.OrdinalIgnoreCase))
+                {
+                    StatusMessage = "Auto-routing to OpenClaw from context…";
+                    _windowsShellService.UpdateTooltip(StatusMessage);
+                    var routed = "nimm openclaw " + promptRaw;
+                    await CompleteLocalAgentHandoffAsync("openclaw", AgentHandoffTriggers.RemoveOpenClawPrompt(routed)).ConfigureAwait(false);
+                    return;
+                }
             }
 
             StatusMessage = $"Asking {Provider}...";
@@ -1520,6 +1784,12 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
             _companionOverlayService.ShowTransient("ready", BuildOverlaySnippet(AssistantResponse));
             OnPropertyChanged(nameof(HasPendingActionPlan));
             OnPropertyChanged(nameof(HasRemainingPlanSteps));
+
+            if (SpeakResponses && SpeakAfterAsk)
+            {
+                var spokenText = AssistantResponse;
+                _ = SpeakAfterCloudAskAsync(spokenText);
+            }
         }
         catch (Exception exception)
         {
@@ -1541,6 +1811,77 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
         finally
         {
             IsAssistantBusy = false;
+        }
+    }
+
+    private async Task SpeakAfterCloudAskAsync(string text)
+    {
+        var compact = string.IsNullOrWhiteSpace(text) ? string.Empty : text.Trim();
+        if (compact.Length > 12_000)
+        {
+            compact = compact[..12_000];
+        }
+
+        if (string.IsNullOrWhiteSpace(compact))
+        {
+            return;
+        }
+
+        try
+        {
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                StatusMessage = "Auto-speaking reply…";
+                _windowsShellService.UpdateTooltip(StatusMessage);
+                _companionOverlayService.SetState("speaking", "auto voice reply");
+            });
+
+            if (_assistantRuntimeService.IsElevenLabsVoiceConfigured())
+            {
+                try
+                {
+                    var path = await _assistantRuntimeService.SynthesizeSpeechToFileAsync(compact).ConfigureAwait(false);
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        LastGeneratedAudioPath = path;
+                        _assistantRuntimeService.OpenFileWithShell(path);
+                        StatusMessage = "Auto-speak: opened ElevenLabs audio.";
+                        _windowsShellService.UpdateTooltip(StatusMessage);
+                        _companionOverlayService.ShowTransient("speaking", "auto voice done");
+                    });
+                    return;
+                }
+                catch
+                {
+                    // SAPI below
+                }
+            }
+
+            var ok = await Task.Run(() => WindowsSpeechFallback.TrySpeak(compact)).ConfigureAwait(false);
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                if (ok)
+                {
+                    LastGeneratedAudioPath = string.Empty;
+                    StatusMessage = "Auto-speak: Windows voice.";
+                }
+                else
+                {
+                    StatusMessage = "Auto-speak skipped (no voice path worked).";
+                }
+
+                _windowsShellService.UpdateTooltip(StatusMessage);
+                _companionOverlayService.ShowTransient("ready", StatusMessage);
+            });
+        }
+        catch
+        {
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                StatusMessage = "Auto-speak failed.";
+                _windowsShellService.UpdateTooltip(StatusMessage);
+                _companionOverlayService.SetState("ready", "auto-speak failed");
+            });
         }
     }
 
@@ -2412,7 +2753,11 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
             "explorer" => "Explorer: focus_window, list_controls, read_form, path rituals, folder workflows",
             "mail" => "Mail: focus_window, read_form, guarded review rituals, send/post denylist active",
             "ide" => "IDE: focus_window, list_controls, codex/claude/openclaw handoff rituals",
-            _ => "Desktop: list_controls, read_form, ritual replay, knowledge-backed operator plans"
+            "creo" => "Creo/PTC: Win32 fat client — list_controls, read_form, read_dialog, app| semantic actions; use ritual guards ifapp=creo (ax.* only for Dynamics AX)",
+            "babtec" => "Babtec: Win32 fat client — list_controls, read_form, app| actions; guards ifapp=babtec",
+            "catia" => "CATIA: Win32 fat client — list_controls, read_form, app| actions; guards ifapp=catia",
+            "nx" => "Siemens NX: Win32 fat client — list_controls, read_form, app| actions; guards ifapp=nx",
+            _ => "Desktop fat client: list_controls, read_form, ritual replay, knowledge-backed plans; set ritual Guard app to creo, babtec, catia, nx, or ax as needed"
         };
     }
 
@@ -2882,6 +3227,11 @@ public string Subtitle => "desktop operator surface for Karl Klammer";
             normalized == "ax.focus_window")
         {
             return "low";
+        }
+
+        if (normalized == "ax.post" || normalized.StartsWith("ax.post:", StringComparison.Ordinal))
+        {
+            return "high";
         }
 
         return "safe";

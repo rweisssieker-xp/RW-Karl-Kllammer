@@ -1,4 +1,5 @@
 using System.IO.Compression;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -75,6 +76,8 @@ public sealed class OperatorWorkspaceService
             SpeakResponses = ReadBool(settings, "SpeakResponses"),
             UseLocalKnowledge = ReadBool(settings, "UseLocalKnowledge"),
             SuggestAutomations = ReadBool(settings, "SuggestAutomations"),
+            AutoRouteLocalAgents = ReadBoolWithDefault(settings, "AutoRouteLocalAgents", defaultValue: true),
+            SpeakAfterAsk = ReadBoolWithDefault(settings, "SpeakAfterAsk", defaultValue: false),
             RuntimeSummary = BuildRuntimeSummary(File.Exists(EnvPath), documents.Count, history.Count, watchSessions.Count, diagnostics.Count),
             KnowledgeStatus = GetKnowledgeStatusText(documents.Count),
             KnowledgeDocuments = documents,
@@ -87,7 +90,15 @@ public sealed class OperatorWorkspaceService
         };
     }
 
-    public void SaveSettings(string provider, string model, string mode, bool speakResponses, bool useLocalKnowledge, bool suggestAutomations)
+    public void SaveSettings(
+        string provider,
+        string model,
+        string mode,
+        bool speakResponses,
+        bool useLocalKnowledge,
+        bool suggestAutomations,
+        bool autoRouteLocalAgents,
+        bool speakAfterAsk)
     {
         Directory.CreateDirectory(DataRoot);
         var settings = ReadStringDictionary(SettingsPath);
@@ -98,6 +109,8 @@ public sealed class OperatorWorkspaceService
         settings["SpeakResponses"] = speakResponses ? "true" : "false";
         settings["UseLocalKnowledge"] = useLocalKnowledge ? "true" : "false";
         settings["SuggestAutomations"] = suggestAutomations ? "true" : "false";
+        settings["AutoRouteLocalAgents"] = autoRouteLocalAgents ? "true" : "false";
+        settings["SpeakAfterAsk"] = speakAfterAsk ? "true" : "false";
         File.WriteAllText(SettingsPath, JsonSerializer.Serialize(settings, JsonOptions), Encoding.UTF8);
     }
 
@@ -332,6 +345,58 @@ public sealed class OperatorWorkspaceService
         }
     }
 
+    /// <summary>ZIP with redacted context for support: settings, env key names only, filtered diagnostics, runtime info. No .env values.</summary>
+    public string ExportSupportBundle(IReadOnlyList<DiagnosticEntry> diagnosticsForExport, int maxDiagnosticLines = 500)
+    {
+        Directory.CreateDirectory(DataRoot);
+        var zipPath = Path.Combine(DataRoot, $"support-bundle-{DateTime.UtcNow:yyyyMMdd-HHmmss}.zip");
+        var envKeys = ReadEnvFile().Keys.OrderBy(k => k, StringComparer.OrdinalIgnoreCase).ToList();
+        var asm = Assembly.GetExecutingAssembly().GetName();
+        var appInfo =
+            $"Carolus Nexus operator export{Environment.NewLine}" +
+            $"timestamp_utc: {DateTime.UtcNow:o}{Environment.NewLine}" +
+            $"assembly: {asm.Name} {asm.Version}{Environment.NewLine}" +
+            $"os: {Environment.OSVersion}{Environment.NewLine}" +
+            $"repo_root: {RepoRoot}{Environment.NewLine}" +
+            $"env_path_exists: {File.Exists(EnvPath)}{Environment.NewLine}";
+
+        var diagLines = diagnosticsForExport
+            .Take(Math.Max(0, maxDiagnosticLines))
+            .Select(e => e.ToString());
+
+        using (var fs = File.Create(zipPath))
+        using (var zip = new ZipArchive(fs, ZipArchiveMode.Create))
+        {
+            static void AddUtf8(ZipArchive z, string name, string text)
+            {
+                var entry = z.CreateEntry(name);
+                using var w = new StreamWriter(entry.Open(), new UTF8Encoding(false));
+                w.Write(text);
+            }
+
+            AddUtf8(zip, "readme.txt",
+                "Support bundle for Carolus Nexus.\n" +
+                "- settings.json: local operator settings (no API secrets).\n" +
+                "- env-variable-names.txt: keys present in .env only; values are NOT included.\n" +
+                "- diagnostics-export.txt: lines from the current diagnostics list in the UI.\n" +
+                "- runtime.txt: build and OS summary.\n");
+            AddUtf8(zip, "runtime.txt", appInfo);
+            AddUtf8(zip, "env-variable-names.txt", string.Join(Environment.NewLine, envKeys));
+            AddUtf8(zip, "diagnostics-export.txt", string.Join(Environment.NewLine, diagLines));
+
+            if (File.Exists(SettingsPath))
+            {
+                AddUtf8(zip, "settings.json", File.ReadAllText(SettingsPath, Encoding.UTF8));
+            }
+            else
+            {
+                AddUtf8(zip, "settings.json", "{}\n");
+            }
+        }
+
+        return zipPath;
+    }
+
     public Dictionary<string, string> ReadEnvFile()
     {
         var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -394,6 +459,16 @@ public sealed class OperatorWorkspaceService
     private static bool ReadBool(Dictionary<string, string> settings, string key)
     {
         return settings.TryGetValue(key, out var value) && bool.TryParse(value, out var parsed) && parsed;
+    }
+
+    private static bool ReadBoolWithDefault(Dictionary<string, string> settings, string key, bool defaultValue)
+    {
+        if (!settings.TryGetValue(key, out var value) || string.IsNullOrWhiteSpace(value))
+        {
+            return defaultValue;
+        }
+
+        return bool.TryParse(value, out var parsed) && parsed;
     }
 
     private List<T> ReadJsonList<T>(string path)

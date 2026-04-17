@@ -1,8 +1,8 @@
 using System.Text.RegularExpressions;
-using CarolusNexus.Core;
 
-namespace ClippyRWAvalonia.Services;
+namespace CarolusNexus.Core;
 
+/// <summary>Detects German CLI handoff phrases and IDE-style auto-routing (legacy WinForms parity).</summary>
 public static class AgentHandoffTriggers
 {
     private static readonly Regex CodexTriggerRegex = new(
@@ -59,9 +59,7 @@ public static class AgentHandoffTriggers
         return CodexTriggerRegex.Replace(normalized, string.Empty, 1).Trim();
     }
 
-    /// <summary>
-    /// Returns "codex", "openclaw", or empty — same heuristics as legacy WinForms <see cref="IntentRouter"/>.
-    /// </summary>
+    /// <summary>Returns "codex", "openclaw", or empty — same heuristics as legacy WinForms IntentRouter.</summary>
     public static string DetectIntentRoute(string prompt, ActiveWindowInfo activeWindow)
     {
         var normalizedPrompt = (prompt ?? string.Empty).Trim().ToLowerInvariant();

@@ -6,11 +6,11 @@ This document tracks the migration path described in [`avalonia/README.md`](../a
 
 | Layer | Project | Responsibility |
 |-------|---------|----------------|
-| Cross-platform core | [`CarolusNexus.Core`](../CarolusNexus.Core/CarolusNexus.Core.csproj) | Workspace path resolution (`WorkspaceLayout`, `WorkspacePathResolver`), shared DTOs such as `ActiveWindowInfo` |
+| Cross-platform core | [`CarolusNexus.Core`](../CarolusNexus.Core/CarolusNexus.Core.csproj) | Workspace path resolution (`WorkspaceLayout`, `WorkspacePathResolver`), shared DTOs (`ActiveWindowInfo`), CLI/intent handoff detection ([`AgentHandoffTriggers`](../CarolusNexus.Core/AgentHandoffTriggers.cs)) |
 | Windows platform | [`CarolusNexus.Platform.Windows`](../CarolusNexus.Platform.Windows/CarolusNexus.Platform.Windows.csproj) | Win32 foreground window capture and app-kind / desktop-framework heuristics (`WindowsForegroundWindow`) |
 | UI + composition | [`avalonia/ClippyRW.Avalonia.csproj`](../avalonia/ClippyRW.Avalonia.csproj) | Avalonia shell, view models, orchestration |
 
-The Avalonia app references Core and Platform.Windows. Workspace path logic and active-window capture are the first extracted seams; file/knowledge/ritual logic remains in `OperatorWorkspaceService` until further splits make sense.
+The Avalonia app references Core and Platform.Windows. Workspace path logic, active-window capture, and **agent handoff triggers** live in Core; file/knowledge/ritual logic remains in `OperatorWorkspaceService` until further splits make sense.
 
 ## Target state (incremental)
 
